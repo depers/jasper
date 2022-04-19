@@ -1,0 +1,13 @@
+
+
+* {
+    margin: 0;
+}
+.fake-img {
+    height: 200px;
+}
+
+
+header {
+    background: #1abc9c;
+}
