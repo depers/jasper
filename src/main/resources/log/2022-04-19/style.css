@@ -1,13 +1,83 @@
 
 
 * {
-    margin: 0;
-}
-.fake-img {
-    height: 200px;
+    /*margin: 0;*/
+    box-sizing: border-box;
 }
 
+body {
+    margin: 0;
+}
 
 header {
     background: #1abc9c;
+    text-align: center;
+    color: white;
+    padding: 60px 0;
+}
+
+nav li {
+    list-style-type: none;
+}
+
+nav ul {
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+nav li a {
+    display: block;
+    padding: 14px 20px;
+    text-align: center;
+    color: white;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+nav li a:hover {
+    background-color: #ddd;
+    color: black;
+}
+
+nav {
+    background-color: #333;
+}
+
+main {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+aside {
+    flex: 3;
+    background-color: #f1f1f1;
+    padding: 20px;
+}
+
+article {
+    flex: 7;
+    padding: 20px;
+}
+
+.fake-img {
+    background-color: #aaa;
+    padding: 20px;
+}
+
+.img-200h {
+    height: 200px;
+}
+
+footer {
+    background-color: #ddd;
+    padding: 20px;
+    text-align: center;
+}
+
+/* 响应式布局 - 当屏幕小于 700 像素宽时，让两列堆叠而不是并排 */
+@media screen and (max-width: 700px) {
+    nav ul, main {
+        flex-direction: column;
+    }
 }
