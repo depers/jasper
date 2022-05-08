@@ -11,7 +11,8 @@
     padding: 0 4px;
 }
 
-/* 响应式布局 - 创建两列而不是四列布局 */
+/* 响应式布局 - 创建两列而不是四列
+布局 */
 @media screen and (max-width: 800px) {
     .column {
         flex: 50%;
