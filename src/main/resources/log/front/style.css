@@ -18,6 +18,12 @@ a {
 
 body {
     margin: 0;
+    font-family: "Roboto";
+}
+
+p{
+    margin-block-start: 0;
+    margin-block-end: 0;
 }
 
 .md-header {
@@ -101,4 +107,73 @@ body {
     width: 1.2rem;
     margin-top: 0.6rem;
     margin-left: 0.6rem;
+}
+
+.md-header__source {
+    max-width: 11.7rem;
+    width: 11.7rem;
+}
+
+
+/* main部分的样式 */
+
+.md-main__inner {
+    display: flex;
+    margin-top: 1.5rem;
+    background-color: lightgreen;
+    font-family: HarmonyOS_Regular ;
+}
+
+.md-sidebar {
+    position: sticky;
+    width: 12.1rem;
+    padding: 1.2rem 0;
+    align-self: flex-start;
+    /* 即便是容器宽度发生变化，保证宽度不会被压缩 */
+    flex-shrink: 0; 
+}
+
+.md-content {
+    flex-grow: 1;
+    min-width: 0;
+    background-color: white;
+}
+
+.md-content__inner {
+    margin: 0 0.8rem 1.2rem;
+    padding: 1.5rem 0 1rem;
+    background-color: white;
+    border-bottom: 1px solid rgba(0,0,0,.05);
+}
+
+.md-typeset {
+    font-size: .8rem;
+    line-height: 1.6;
+}
+
+.md-content__word_small {
+    text-align: center;
+    font-size: 14px;
+    color: gray;
+    line-height: 1.8;
+}
+
+.md-content__word_date {
+    text-align: center;
+    font-size: 14px;
+    color: rgba(0,10,20,.4);
+    line-height: 1.8;
+}
+
+.md-content__word {
+    text-align: center;
+    font-size: 24px;
+    line-height: 1.8;
+    color: rgba(0,0,0,.75);
+}
+
+.md-content__desc {
+    margin-top: .8rem;
+    color: rgba(0,0,0,.75);
+    font-size: 17px
 }
