@@ -1,0 +1,240 @@
+
+/* 公共样式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 24px;
+    --main-bg-color: #4051b5;
+    --main-border-color: rgba(0,0,0,.05);
+}
+
+com-width {
+    width: 80%;
+    margin: 0 auto;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* 私有样式 */
+
+body {
+    margin: 0;
+    font-family: "Roboto";
+}
+
+p{
+    margin-block-start: 0;
+    margin-block-end: 0;
+}
+
+.md-header {
+    background-color: var(--main-bg-color);
+    box-shadow: 0 0 0.2rem rgb(0 0 0 / 10%), 0 0.2rem 0.4rem rgb(0 0 0 / 20%);
+    color: #fff;
+    position: -webkit-sticky; /* Safari */
+	position: sticky;
+	top: 0;
+}
+
+
+.md-grid {
+    max-width: 42rem;
+    margin: 0 auto;
+}
+
+.md-grid__inner {
+    display: flex;
+    align-items: center;
+    padding: 0 0.2rem;
+}
+
+.md-logo {
+    margin: 0.2rem;
+    padding: 0.4rem;
+}
+
+.md-header__button {
+    display: inline-block;
+    color: currentcolor;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+.md-header__button.md-logo :-webkit-any(img,svg) {
+    fill: currentcolor;
+    display: block;
+    height: 1.2rem;
+    width: auto;
+}
+
+.md-header__title {
+    margin-left: 0.5rem;
+    margin-right: 0.4rem;
+    font-size: .9rem;
+    line-height: 2.4rem;
+    flex-grow: 1;
+}
+
+.md-header__topic:first-child {
+    font-weight: 700;
+}
+.md-source {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    display: block;
+    font-size: .65rem;
+    line-height: 1.2;
+    outline-color: var(--md-accent-fg-color);
+    transition: opacity .25s;
+    white-space: nowrap;
+
+}
+
+.md-source__icon {
+    display: inline-block;
+    height: 2.4rem;
+    vertical-align: middle;
+    width: 2rem;
+}
+
+.md-source__repository {
+    display: inline-block;
+}
+
+.md-icon svg {
+    fill: currentcolor;
+    display: block;
+    height: 1.2rem;
+    width: 1.2rem;
+    margin-top: 0.6rem;
+    margin-left: 0.6rem;
+}
+
+.md-header__source {
+    max-width: 11.7rem;
+    width: 11.7rem;
+    display: flex;
+    justify-content: flex-end;
+    margin-right: 0.5rem;
+}
+
+
+
+/* main部分的样式 */
+
+.md-main__inner {
+    display: flex;
+    flex-direction: column;
+    margin-top: 1.5rem;
+    font-family: quote, elipse, dash, emdash, HarmonyOS_Regular ;
+}
+
+
+.md-content {
+    background-color: white;
+}
+
+.md-content__inner {
+    margin: 0 0.8rem;
+    padding: 1.2rem 0 1.2rem;
+    background-color: white;
+    border-bottom: 1px solid rgba(0,0,0,.05);
+}
+
+.md-typeset {
+    font-size: .8rem;
+    line-height: 1.6;
+}
+
+.md-content__word_small {
+    text-align: center;
+    font-size: 14px;
+    color: gray;
+    line-height: 1.8;
+}
+
+.md-content__word_date {
+    text-align: center;
+    font-size: 14px;
+    color: rgba(0,10,20,.4);
+    line-height: 1.8;
+}
+
+.md-content__word {
+    text-align: center;
+    display: block;
+    font-size: 24px;
+    line-height: 1.8;
+    color: rgba(0,0,0,.75);
+    font-style: normal;
+    font-weight: 400;
+}
+
+.md-content__word:hover {
+    color: var(--main-bg-color);
+}
+
+.md-content__desc {
+    margin-top: .8rem;
+    color: rgba(0,0,0,.75);
+    font-size: 17px
+}
+
+
+  
+/* 底部标签样式 */
+
+/** 分页插件的样式 **/
+.pagination {
+    text-align: center;
+    margin: 1.25rem 0;
+    user-select: none;
+}
+
+.pagination li{
+    display: inline-block;
+}
+
+.pagination .page-item:hover {
+    box-shadow: 0 0 0.2rem rgb(0 0 0 / 10%), 0 0.2rem 0.4rem rgb(0 0 0 / 20%);
+}
+
+.pagination li a{
+    text-decoration: none;
+    font-size: 0.7rem;
+    height: 1.5rem;
+    line-height: 1.5rem;
+    padding: 0.2rem 0.7rem;
+    color: #fff;
+}
+
+.pagination svg {
+    fill: currentColor;
+}
+
+
+.previous-page, .next-page {
+    background: var(--main-bg-color);
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.page-num {
+    font-size: 0.7rem;
+    margin: 0 0.2rem;
+}
+
+/* 底部 */
+.foot-bg {
+    padding: 0.8rem;
+    background: #efefef;
+    text-align: center;
+    font-size: 13px;
+}

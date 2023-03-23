@@ -12,10 +12,27 @@ public class GithubContent {
     private String path;
     private String type;
 
+    private String content;
+
     public GithubContent(String name, String path, String type) {
         this.name = name;
         this.path = path;
         this.type = type;
+    }
+
+    public GithubContent(String name, String path, String type, String content) {
+        this.name = name;
+        this.path = path;
+        this.type = type;
+        this.content = content;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 
     public String getName() {
@@ -48,6 +65,7 @@ public class GithubContent {
                 "name='" + name + '\'' +
                 ", path='" + path + '\'' +
                 ", type='" + type + '\'' +
+                ", content='" + content + '\'' +
                 '}';
     }
 }

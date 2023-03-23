@@ -28,8 +28,6 @@ import java.util.concurrent.TimeUnit;
  * @date : Created in 2023/2/1 15:50
  */
 public class PullGithubScheduled {
-
-
     private static ObjectMapper mapper;
     private static List<GithubContent> githubContentList = new ArrayList<>();
 
@@ -38,6 +36,7 @@ public class PullGithubScheduled {
         SimpleModule module =
                 new SimpleModule("CustomDeserializer", new Version(1, 0, 0, null, null, null));
         module.addDeserializer(List.class, new CustomDeserializer());
+        module.addDeserializer(GithubContent.class, new CustomFileDeserializer());
         mapper.registerModule(module);
     }
 
@@ -50,7 +49,20 @@ public class PullGithubScheduled {
         executorService.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                // 执行逻辑
+
+                try {
+                    // 拉取数据
+                    List<GithubContent> list = mapper.readValue(pullData(""), List.class);
+                    for (GithubContent item : list) {
+                        checkFile(item);
+                    }
+                    // 将文章信息存库
+
+
+                } catch (Throwable e) {
+
+                }
+
             }
         }, 1, 3, TimeUnit.SECONDS);
     }
@@ -70,6 +82,7 @@ public class PullGithubScheduled {
                 HttpEntity entity = response.getEntity();
                 return entity != null ? EntityUtils.toString(entity) : null;
             } else {
+
                 throw new ClientProtocolException("Unexpected response status: " + status);
             }
         };
@@ -83,7 +96,9 @@ public class PullGithubScheduled {
     public static boolean checkFile(GithubContent content) throws Exception {
         System.out.println("1--content=" + content);
         if (content.getType().equals("file")) {
-            githubContentList.add(content);
+            String fileJson = pullData(content.getPath());
+            GithubContent item = mapper.readValue(fileJson, GithubContent.class);
+            githubContentList.add(item);
             return true;
         }
 
@@ -99,13 +114,12 @@ public class PullGithubScheduled {
 
 
     public static void main(String[] args) throws Exception {
-        List<GithubContent> list = mapper.readValue(pullData(""), List.class);
-        for (GithubContent item : list) {
-            checkFile(item);
-        }
 
 
         System.out.println(githubContentList);
+
+
+
     }
 
 
