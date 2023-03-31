@@ -1,4 +1,4 @@
-package cn.bravedawn;
+package cn.bravedawn.web.mvc.controller;
 
 /**
  * @author : fengx9
