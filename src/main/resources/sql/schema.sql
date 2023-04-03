@@ -2,7 +2,8 @@
 CREATE table `article`(
     `id`           bigint(11)   not null auto_increment comment '主键',
     `title`        varchar(100) not null default '' comment '文章标题',
-    `content` text not null default '' comment '文章内容',
+    `intro`        varchar(300) not null default '' comment '文章简介',
+    `content`      text not null default '' comment '文章内容',
     `path`         varchar(200) not null default '' comment '文章路径',
     `author`       varchar(20)  not null default '' comment '作者',
     `publish_date` date         not null comment '发布日期',
