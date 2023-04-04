@@ -42,7 +42,7 @@ public class CustomDeserializer extends StdDeserializer<List<GithubContent>> {
         super(vc);
     }
 
-    public List<GithubContent> deserialize(JsonParser parser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
+    public List<GithubContent> deserialize(JsonParser parser, DeserializationContext deserializationContext) throws IOException {
 
         List<GithubContent> list = new ArrayList<>();
         ObjectCodec codec = parser.getCodec();

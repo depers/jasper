@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--status:Log4j2内部日志的输出级别,设置为TRACE对学习Log4j2非常有用 -->
 <!--monitorInterval:定时检测配置文件的修改,有变化则自动重新加载配置,时间单位为秒,最小间隔为5s -->
-<Configuration status="WARN" monitorInterval="600">
+<Configuration status="TRACE" monitorInterval="600">
 
     <!--properties:设置全局变量 -->
     <properties>
         <!--LOG_HOME:指定当前日志存放的目录 -->
-        <property name="LOG_HOME">/logs/jasper</property>
+        <property name="LOG_HOME">~/logs/jasper</property>
         <!--FILE_NAME:指定日志文件的名称 -->
         <property name="FILE_NAME">jasperLog</property>
         <!--PATTERN_FORMAT：指定日志输出的格式-->
@@ -99,10 +99,10 @@
     </Appenders>
     <Loggers>
         <!-- 级别顺序（低到高）：TRACE < DEBUG < INFO < WARN < ERROR < FATAL -->
-        <Root level="DEBUG" includeLocation="true">
+        <Root level="INFO" includeLocation="true">
             <!--AppenderRef中的ref值必须是在前面定义的appenders-->
-            <AppenderRef ref="Routing"/>
             <AppenderRef ref="ConsolePrint"/>
+            <AppenderRef ref="Routing"/>
         </Root>
     </Loggers>
 </Configuration>

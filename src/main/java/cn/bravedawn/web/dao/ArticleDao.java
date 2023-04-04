@@ -1,8 +1,7 @@
 package cn.bravedawn.web.dao;
 
-import cn.bravedawn.web.entity.Article;
+import cn.bravedawn.web.mbg.model.Article;
 import org.apache.ibatis.annotations.Result;
-import org.apache.ibatis.annotations.ResultMap;
 import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.session.RowBounds;
