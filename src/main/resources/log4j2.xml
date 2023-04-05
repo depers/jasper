@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--status:Log4j2内部日志的输出级别,设置为TRACE对学习Log4j2非常有用 -->
 <!--monitorInterval:定时检测配置文件的修改,有变化则自动重新加载配置,时间单位为秒,最小间隔为5s -->
-<Configuration status="TRACE" monitorInterval="600">
+<Configuration status="WARN" monitorInterval="600">
 
     <!--properties:设置全局变量 -->
     <properties>

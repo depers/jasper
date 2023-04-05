@@ -6,26 +6,52 @@ import cn.bravedawn.web.exception.BusinessException;
 /**
  * 响应结果
  */
-public class CommonResult<T> {
+public class CommonResult {
 
     private String code;
     private String msg;
-    private T data;
+    private Object data;
 
     private CommonResult() {};
 
-    public CommonResult<T> SUCCESS(T data) {
-        this.code = ResultEnum.SUCCESS.getCode();
-        this.msg = ResultEnum.SUCCESS.getMsg();
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public Object getData() {
+        return data;
+    }
+
+    public void setData(Object data) {
         this.data = data;
-        return this;
+    }
+
+    public static CommonResult SUCCESS(Object data) {
+        CommonResult result = new CommonResult();
+        result.code = ResultEnum.SUCCESS.getCode();
+        result.msg = ResultEnum.SUCCESS.getMsg();
+        result.data = data;
+        return result;
     }
 
 
-    public CommonResult<T> FAILURE(BusinessException exception) {
-        this.code = exception.getResultEnum().getCode();
-        this.msg = exception.getResultEnum().getMsg();
-        return this;
+    public static CommonResult FAILURE(BusinessException exception) {
+        CommonResult result = new CommonResult();
+        result.code = exception.getResultEnum().getCode();
+        result.msg = exception.getResultEnum().getMsg();
+        return result;
     }
 
 

@@ -2,12 +2,13 @@ package cn.bravedawn.web.dto.index;
 
 import java.util.List;
 
-public class ArticleItem {
+public class ArticleItemDTO {
 
     private List<String> tags;
     private String title;
     private String createDate;
     private String intro;
+    private String articleId;
 
     public List<String> getTags() {
         return tags;
@@ -39,5 +40,13 @@ public class ArticleItem {
 
     public void setIntro(String intro) {
         this.intro = intro;
+    }
+
+    public String getArticleId() {
+        return articleId;
+    }
+
+    public void setArticleId(String articleId) {
+        this.articleId = articleId;
     }
 }

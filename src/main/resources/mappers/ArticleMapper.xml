@@ -22,13 +22,23 @@
         id, title, intro, content, path, author, publish_date, insert_time, update_time
     </sql>
 
-    <select id="selectArticleList" resultType="cn.bravedawn.web.mbg.model.Article">
+    <select id="selectArticleList" resultType="article">
         SELECT
+            id,
             title,
             intro,
-            publish_date
+            insert_time
         FROM
             article
+    </select>
+
+    <select id="selectById" resultType="article">
+        SELECT
+            <include refid="Base_Column_List"/>
+        FROM
+            article
+        where
+            id = #{articleId}
     </select>
 
 </mapper>
