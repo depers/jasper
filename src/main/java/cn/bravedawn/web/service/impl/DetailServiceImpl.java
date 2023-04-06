@@ -2,6 +2,7 @@ package cn.bravedawn.web.service.impl;
 
 import cn.bravedawn.web.common.CommonResult;
 import cn.bravedawn.web.common.ResultEnum;
+import cn.bravedawn.web.db.JasperTransactionManager;
 import cn.bravedawn.web.dto.detail.ArticleDetailDTO;
 import cn.bravedawn.web.dto.detail.CommentDTO;
 import cn.bravedawn.web.dto.detail.CommentReqDTO;
@@ -44,7 +45,7 @@ public class DetailServiceImpl implements DetailService {
 
 
     @Override
-    public CommonResult getDetail(long articleId) {
+    public CommonResult<ArticleDetailDTO> getDetail(long articleId) {
         Article article = articleMapper.selectById(articleId);
         if (article == null) {
             log.error("没有找到id={}的文章，查询失败", articleId);
@@ -73,17 +74,16 @@ public class DetailServiceImpl implements DetailService {
     }
 
 
-
     @Override
-    public CommonResult addComment(CommentReqDTO reqDTO) {
+    public CommonResult<?> addComment(CommentReqDTO reqDTO) {
         Comment comment = new Comment();
         comment.setArticleId(Long.parseLong(reqDTO.getArticleId()));
         comment.setNickname(reqDTO.getNickname());
         comment.setContent(reqDTO.getContent());
         comment.setEmail(reqDTO.getEmail());
         comment.setPersonalSite(reqDTO.getPersonalSite());
-
-        return null;
+        commentMapper.insertSelective(comment);
+        return CommonResult.SUCCESS();
     }
 
 

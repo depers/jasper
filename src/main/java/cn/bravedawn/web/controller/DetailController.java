@@ -3,23 +3,23 @@ package cn.bravedawn.web.controller;
 
 import cn.bravedawn.web.common.CommonResult;
 import cn.bravedawn.web.common.ResultEnum;
+import cn.bravedawn.web.dto.detail.ArticleDetailDTO;
 import cn.bravedawn.web.dto.detail.CommentReqDTO;
 import cn.bravedawn.web.exception.BusinessException;
 import cn.bravedawn.web.service.DetailService;
 import org.apache.commons.lang.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/detail")
 public class DetailController {
 
-    private static final Logger log = LogManager.getLogger(DetailController.class);
+    private static final Logger log = LoggerFactory.getLogger(DetailController.class);
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^(.+)@(.+)$");
 
@@ -33,7 +33,7 @@ public class DetailController {
      * @return 文章详细信息和评论
      */
     @RequestMapping("/{id}")
-    public CommonResult getDetail(@PathVariable(required = false, name = "id") String id) {
+    public CommonResult<ArticleDetailDTO> getDetail(@PathVariable(required = false, name = "id") String id) {
 
         if (StringUtils.isBlank(id)) {
             log.error("请求参数id为空");
@@ -50,7 +50,7 @@ public class DetailController {
      * @return 评论结果
      */
     @PostMapping("/comment")
-    public CommonResult comment(@RequestBody(required = false) CommentReqDTO commentReqDTO) {
+    public CommonResult<?> comment(@RequestBody(required = false) CommentReqDTO commentReqDTO) {
 
         if (StringUtils.isBlank(commentReqDTO.getArticleId())) {
             log.error("请求参数文章id为空");

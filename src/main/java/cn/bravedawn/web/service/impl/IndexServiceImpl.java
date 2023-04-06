@@ -10,6 +10,8 @@ import cn.bravedawn.web.service.IndexService;
 import cn.bravedawn.web.util.LocalDateUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,8 @@ import java.util.List;
 
 @Service
 public class IndexServiceImpl implements IndexService {
+
+    private static final Logger log = LoggerFactory.getLogger(IndexServiceImpl.class);
 
     @Autowired
     private ArticleMapper articleMapper;
@@ -36,7 +40,7 @@ public class IndexServiceImpl implements IndexService {
      * @return 分页之后的数据
      */
     @Override
-    public CommonResult getArticleList(int pageSize, int pageNum) {
+    public CommonResult<CommonPageResult> getArticleList(int pageSize, int pageNum) {
         PageHelper.startPage(pageNum, pageSize);
         List<Article> articleList = articleMapper.selectArticleList();
         CommonPageResult commonPageResult = CommonPageResult.init(new PageInfo<Article>(articleList));

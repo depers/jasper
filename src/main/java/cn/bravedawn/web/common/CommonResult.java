@@ -6,13 +6,24 @@ import cn.bravedawn.web.exception.BusinessException;
 /**
  * 响应结果
  */
-public class CommonResult {
+public class CommonResult<S> {
 
     private String code;
     private String msg;
-    private Object data;
+    private S data;
 
     private CommonResult() {};
+
+    private CommonResult(String code, String msg, S data) {
+        this.code = code;
+        this.msg = msg;
+        this.data = data;
+    }
+
+    public CommonResult(String code, String msg) {
+        this.code = code;
+        this.msg = msg;
+    }
 
     public String getCode() {
         return code;
@@ -30,28 +41,24 @@ public class CommonResult {
         this.msg = msg;
     }
 
-    public Object getData() {
+    public S getData() {
         return data;
     }
 
-    public void setData(Object data) {
+    public void setData(S data) {
         this.data = data;
     }
 
-    public static CommonResult SUCCESS(Object data) {
-        CommonResult result = new CommonResult();
-        result.code = ResultEnum.SUCCESS.getCode();
-        result.msg = ResultEnum.SUCCESS.getMsg();
-        result.data = data;
-        return result;
+    public static <T> CommonResult<T> SUCCESS() {
+        return new CommonResult<>(ResultEnum.SUCCESS.getCode(), ResultEnum.SUCCESS.getMsg());
     }
 
+    public static <T> CommonResult<T> SUCCESS(T data) {
+        return new CommonResult<>(ResultEnum.SUCCESS.getCode(), ResultEnum.SUCCESS.getMsg(), data);
+    }
 
-    public static CommonResult FAILURE(BusinessException exception) {
-        CommonResult result = new CommonResult();
-        result.code = exception.getResultEnum().getCode();
-        result.msg = exception.getResultEnum().getMsg();
-        return result;
+    public static <T> CommonResult<T> FAILURE(BusinessException exception) {
+        return new CommonResult<>(exception.getResultEnum().getCode(), exception.getResultEnum().getMsg());
     }
 
 

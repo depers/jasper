@@ -7,4 +7,6 @@ import java.util.List;
 public interface CommentMapper {
 
     List<Comment> selectListByArticleId(long articleId);
+
+    int insertSelective(Comment comment);
 }

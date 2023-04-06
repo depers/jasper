@@ -1,9 +1,10 @@
 package cn.bravedawn.web.controller;
 
+import cn.bravedawn.web.common.CommonPageResult;
 import cn.bravedawn.web.common.CommonResult;
 import cn.bravedawn.web.service.IndexService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,7 +24,7 @@ public class IndexController {
     @Autowired
     private IndexService indexService;
 
-    private static final Logger log = LogManager.getLogger(IndexController.class);
+    private static final Logger log = LoggerFactory.getLogger(IndexController.class);
 
     /**
      * 首页-分页查询文章信息
@@ -32,8 +33,8 @@ public class IndexController {
      * @return 文章简要信息列表
      */
     @GetMapping("/article/list")
-    public CommonResult getArticleList(@RequestParam(required = false, defaultValue = "10") int pageSize,
-                                       @RequestParam(required = false, defaultValue = "1") int pageNum) {
+    public CommonResult<CommonPageResult> getArticleList(@RequestParam(required = false, defaultValue = "10") int pageSize,
+                                                         @RequestParam(required = false, defaultValue = "1") int pageNum) {
         return indexService.getArticleList(pageSize, pageNum);
     }
 

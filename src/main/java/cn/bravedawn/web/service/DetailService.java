@@ -1,6 +1,7 @@
 package cn.bravedawn.web.service;
 
 import cn.bravedawn.web.common.CommonResult;
+import cn.bravedawn.web.dto.detail.ArticleDetailDTO;
 import cn.bravedawn.web.dto.detail.CommentReqDTO;
 
 /**
@@ -11,7 +12,7 @@ import cn.bravedawn.web.dto.detail.CommentReqDTO;
  */
 public interface DetailService {
 
-    CommonResult getDetail(long articleId);
+    CommonResult<ArticleDetailDTO> getDetail(long articleId);
 
-    CommonResult addComment(CommentReqDTO reqDTO);
+    CommonResult<?> addComment(CommentReqDTO reqDTO);
 }

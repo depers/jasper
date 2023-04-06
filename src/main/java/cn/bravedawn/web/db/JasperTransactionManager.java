@@ -33,6 +33,15 @@ public class JasperTransactionManager {
         this.transactionStatus = transactionManager.getTransaction(def);
     }
 
+    public void commit() {
+        transactionManager.commit(transactionStatus);
+    }
+
+
+    public void rollback() {
+        transactionManager.rollback(transactionStatus);
+    }
+
 
     
 
