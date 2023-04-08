@@ -77,7 +77,6 @@ public class DetailController {
             throw new BusinessException(ResultEnum.COMMENT_EMAIL_FORMAT_ERROR);
         }
 
-
         return detailService.addComment(commentReqDTO);
     }
 }

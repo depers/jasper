@@ -30,8 +30,6 @@
     <insert id="insertSelective" parameterType="comment">
         insert
             comment
-            (article_id, nickname, content, email, personal_site)
-        values
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="articleId != null">
                 article_id,
@@ -49,18 +47,18 @@
                 personal_site,
             </if>
         </trim>
-        <trim prefix="(" suffix=")" suffixOverrides=",">
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
             <if test="articleId != null">
                 #{articleId},
             </if>
             <if test="nickname != null">
-                nickname,
+                #{nickname},
             </if>
             <if test="content != null">
-                content,
+                #{content},
             </if>
             <if test="email != null">
-                email,
+                #{email},
             </if>
             <if test="personalSite != null">
                 #{personalSite},

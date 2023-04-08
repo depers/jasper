@@ -33,8 +33,8 @@ public class IndexController {
      * @return 文章简要信息列表
      */
     @GetMapping("/article/list")
-    public CommonResult<CommonPageResult> getArticleList(@RequestParam(required = false, defaultValue = "10") int pageSize,
-                                                         @RequestParam(required = false, defaultValue = "1") int pageNum) {
+    public CommonResult<CommonPageResult> getArticleList(@RequestParam(value = "pageSize", required = false, defaultValue = "10") int pageSize,
+                                                         @RequestParam(value = "pageNum", required = false, defaultValue = "1") int pageNum) {
         return indexService.getArticleList(pageSize, pageNum);
     }
 
