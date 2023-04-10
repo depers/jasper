@@ -35,6 +35,7 @@ public class IndexController {
     @GetMapping("/article/list")
     public CommonResult<CommonPageResult> getArticleList(@RequestParam(value = "pageSize", required = false, defaultValue = "10") int pageSize,
                                                          @RequestParam(value = "pageNum", required = false, defaultValue = "1") int pageNum) {
+        int i = 1 / 0;
         return indexService.getArticleList(pageSize, pageNum);
     }
 

@@ -16,6 +16,8 @@ public enum ResultEnum {
     COMMENT_EMAIL_ERROR("0504", "电子邮箱不能为空"),
     COMMENT_EMAIL_FORMAT_ERROR("0505", "请输入正确的电子邮箱"),
     COMMENT_CONTENT_ERROR("0506", "评论内容不能为空"),
+    COMMENT_CONTENT_TOO_LONG_ERROR("0507", "评论内容不能为空"),
+    COMMENT_FREQUENT_ERROR("0508", "请勿频繁发表评论"),
     ;
 
     private String code;

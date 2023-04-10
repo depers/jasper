@@ -62,4 +62,8 @@ public class CommonResult<S> {
     }
 
 
+    public static <T> CommonResult<T> FAILURE() {
+        return new CommonResult<>(ResultEnum.SYSTEM_ERROR.getCode(), ResultEnum.SYSTEM_ERROR.getMsg());
+    }
+
 }

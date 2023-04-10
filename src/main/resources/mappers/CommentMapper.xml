@@ -65,4 +65,16 @@
             </if>
         </trim>
     </insert>
+
+
+    <select id="selectCountOneHour" parameterType="string" resultType="int">
+        SELECT
+            count(*)
+        FROM
+            comment
+        WHERE
+            email = #{email}
+        AND
+            insert_time BETWEEN date_sub(now(), interval 1 hour) AND now()
+    </select>
 </mapper>

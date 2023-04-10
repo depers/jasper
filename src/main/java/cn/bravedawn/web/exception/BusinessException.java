@@ -6,6 +6,8 @@ public class BusinessException extends RuntimeException{
 
     private ResultEnum resultEnum;
 
+    private String message;
+
     public BusinessException() {
         super();
     }
@@ -26,9 +28,22 @@ public class BusinessException extends RuntimeException{
     public BusinessException(ResultEnum resultEnum) {
         super("[" + resultEnum.getCode() + "]" + resultEnum.getMsg());
         this.resultEnum = resultEnum;
+        this.message = "[" + resultEnum.getCode() + "]" + resultEnum.getMsg();
     }
+
 
     public ResultEnum getResultEnum() {
         return resultEnum;
     }
+
+
+    public void setResultEnum(ResultEnum resultEnum) {
+        this.resultEnum = resultEnum;
+    }
+
+    @Override
+    public String getMessage() {
+        return message;
+    }
+
 }

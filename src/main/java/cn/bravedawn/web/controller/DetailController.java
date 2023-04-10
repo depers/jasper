@@ -51,7 +51,6 @@ public class DetailController {
      */
     @PostMapping("/comment")
     public CommonResult<?> comment(@RequestBody(required = false) CommentReqDTO commentReqDTO) {
-
         if (StringUtils.isBlank(commentReqDTO.getArticleId())) {
             log.error("请求参数文章id为空");
             throw new BusinessException(ResultEnum.REQUEST_PARAMS_ERROR);
@@ -65,6 +64,12 @@ public class DetailController {
         if (StringUtils.isBlank(commentReqDTO.getContent())) {
             log.error("请求参数评论内容为空");
             throw new BusinessException(ResultEnum.COMMENT_CONTENT_ERROR);
+        }
+
+        // 评论内容的长度不得大于100个字符
+        if (commentReqDTO.getContent().length() > 100) {
+            log.error("请求参数评论内容长度大于100个字符, length={}.", commentReqDTO.getContent().length());
+            throw new BusinessException(ResultEnum.COMMENT_CONTENT_TOO_LONG_ERROR);
         }
 
         if (StringUtils.isBlank(commentReqDTO.getEmail())) {
