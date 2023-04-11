@@ -23,7 +23,6 @@ public class ExceptionControllerAdvice {
     private static final Logger log = LoggerFactory.getLogger(ExceptionControllerAdvice.class);
 
     @ExceptionHandler(BusinessException.class)
-    @ResponseStatus(HttpStatus.OK)
     public CommonResult<?> businessExceptionHandler(BusinessException businessException) {
         log.error("发生业务异常, error msg={}.", businessException.getMessage());
         return CommonResult.FAILURE(businessException);
@@ -31,7 +30,6 @@ public class ExceptionControllerAdvice {
 
 
     @ExceptionHandler(SystemException.class)
-    @ResponseStatus(HttpStatus.OK)
     public CommonResult<?> systemExceptionHandler(SystemException systemException) {
         log.error("发生系统异常, error msg={}.", systemException.getMessage());
         return CommonResult.FAILURE();
@@ -39,7 +37,6 @@ public class ExceptionControllerAdvice {
 
 
     @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.OK)
     public CommonResult<?> systemExceptionHandler(Exception exception) {
         log.error("发生其他异常.", exception);
         return CommonResult.FAILURE();

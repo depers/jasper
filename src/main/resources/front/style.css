@@ -219,11 +219,16 @@ p{
     fill: currentColor;
 }
 
-
-.previous-page, .next-page {
+.page-item {
     background: var(--main-bg-color);
     border-radius: 3px;
     cursor: pointer;
+}
+
+.page-btn-invalid {
+    background: #666;
+    cursor: not-allowed;
+    border-radius: 3px;
 }
 
 .page-num {

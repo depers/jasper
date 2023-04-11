@@ -7,7 +7,7 @@
     <title>Jasper</title>
     <link href="style.css" type="text/css" rel="stylesheet"/>
     <script src="js/jquery-3.6.4.js"></script>
-    <script src="js/axios.js"/></script>
+    <script src="js/axios.js"></script>
 </head>
 
 <body>
@@ -57,76 +57,6 @@
 <main class="md-main">
     <div class="md-main__inner md-grid">
         <div class="md-content">
-            <article class="md-content__inner md-typeset">
-                <p class="md-content__word_small">标签</p>
-                <a class="md-content__word" href="http://www.baidu.com">iPhone 4s 老照片1</a>
-                <p class="md-content__word_date">2022/9/19</p>
-                <p class="md-content__desc">
-                    想找一张老照片，忽然就在浩如烟海的文件夹中搜到了 iPhone 4s
-                    的存档照片。 这是 2013 年 1 月 3 日，花了 ¥5708
-                    元的新手机刚拿到，各种新鲜溢于言表。
-                </p>
-            </article>
-            <article class="md-content__inner md-typeset">
-                <p class="md-content__word_small">标签</p>
-                <a class="md-content__word" href="http://www.baidu.com">iPhone 4s 老照片1</a>
-                <p class="md-content__word_date">2022/9/19</p>
-                <p class="md-content__desc">
-                    想找一张老照片，忽然就在浩如烟海的文件夹中搜到了 iPhone 4s
-                    的存档照片。 这是 2013 年 1 月 3 日，花了 ¥5708
-                    元的新手机刚拿到，各种新鲜溢于言表。
-                </p>
-            </article>
-            <article class="md-content__inner md-typeset">
-                <p class="md-content__word_small">标签</p>
-                <a class="md-content__word" href="http://www.baidu.com">iPhone 4s 老照片1</a>
-                <p class="md-content__word_date">2022/9/19</p>
-                <p class="md-content__desc">
-                    想找一张老照片，忽然就在浩如烟海的文件夹中搜到了 iPhone 4s
-                    的存档照片。 这是 2013 年 1 月 3 日，花了 ¥5708
-                    元的新手机刚拿到，各种新鲜溢于言表。
-                </p>
-            </article>
-            <article class="md-content__inner md-typeset">
-                <p class="md-content__word_small">标签</p>
-                <a class="md-content__word" href="http://www.baidu.com">iPhone 4s 老照片1</a>
-                <p class="md-content__word_date">2022/9/19</p>
-                <p class="md-content__desc">
-                    想找一张老照片，忽然就在浩如烟海的文件夹中搜到了 iPhone 4s
-                    的存档照片。 这是 2013 年 1 月 3 日，花了 ¥5708
-                    元的新手机刚拿到，各种新鲜溢于言表。
-                </p>
-            </article>
-            <article class="md-content__inner md-typeset">
-                <p class="md-content__word_small">标签</p>
-                <a class="md-content__word" href="http://www.baidu.com">iPhone 4s 老照片1</a>
-                <p class="md-content__word_date">2022/9/19</p>
-                <p class="md-content__desc">
-                    想找一张老照片，忽然就在浩如烟海的文件夹中搜到了 iPhone 4s
-                    的存档照片。 这是 2013 年 1 月 3 日，花了 ¥5708
-                    元的新手机刚拿到，各种新鲜溢于言表。
-                </p>
-            </article>
-            <article class="md-content__inner md-typeset">
-                <p class="md-content__word_small">标签</p>
-                <a class="md-content__word" href="http://www.baidu.com">iPhone 4s 老照片1</a>
-                <p class="md-content__word_date">2022/9/19</p>
-                <p class="md-content__desc">
-                    想找一张老照片，忽然就在浩如烟海的文件夹中搜到了 iPhone 4s
-                    的存档照片。 这是 2013 年 1 月 3 日，花了 ¥5708
-                    元的新手机刚拿到，各种新鲜溢于言表。
-                </p>
-            </article>
-            <article class="md-content__inner md-typeset">
-                <p class="md-content__word_small">标签</p>
-                <a class="md-content__word" href="http://www.baidu.com">iPhone 4s 老照片1</a>
-                <p class="md-content__word_date">2022/9/19</p>
-                <p class="md-content__desc">
-                    想找一张老照片，忽然就在浩如烟海的文件夹中搜到了 iPhone 4s
-                    的存档照片。 这是 2013 年 1 月 3 日，花了 ¥5708
-                    元的新手机刚拿到，各种新鲜溢于言表。
-                </p>
-            </article>
         </div>
     </div>
 </main>
@@ -171,25 +101,91 @@
 </body>
 
 <script type="text/javascript">
+    const serverUrl = "";
+    const frontUrl = "http://localhost:8080/front/index.html"
     $(document).ready(function(){
-        requestIndex();
+
+        const url = new URL(window.location.href);
+        const page = url.searchParams.get("p");
+        requestIndex(page);
     });
 
-    function requestIndex() {
+    function requestIndex(page) {
+        console.log("page=" + page)
+        if (page == "" || page == undefined) {
+            page = 1;
+        }
+
         axios({
             method: 'get',
-            url: 'http://127.0.0.1:8081/index/article/list',
+            url: 'http://localhost:8081/index/article/list',
             params: {
-                pageNum: 1,
+                pageNum: page,
                 pageSize: 10
             }
+            })
+            .catch(function (error) {
+                console.log(error.toJSON());
             })
             .then(function (response) {
                 console.log(response.data);
                 console.log(response.status);
-                console.log(response.statusText);
-                console.log(response.headers);
-                console.log(response.config);
+                var data = response.data.data;
+                if(response.data.code == "0000") {
+                    // 处理文章内容的填充
+                    var articleHtml = "";
+                    data.list.forEach(element => {
+                        var tagStr = element.tags.join("/");
+                        var jumpUrl = serverUrl + "/details.html"
+                        var ht = "<article class=\"md-content__inner md-typeset\">" +
+                                 "<p class=\"md-content__word_small\">" + 
+                                 element.tags.join(" / ") + 
+                                 "</p>" +
+                                 "<a class=\"md-content__word\" " + 
+                                 "href=\"" + 
+                                 jumpUrl +                                
+                                 "\">" +
+                                 element.title + 
+                                 "</a>" + 
+                                 "<p class=\"md-content__word_date\">" + 
+                                 element.createDate + 
+                                 "</p>" +
+                                 "<p class=\"md-content__desc\">" +
+                                element.intro +
+                                 "</p>" +
+                                 "</article>"
+                        articleHtml = articleHtml + ht;
+                    });
+                    $(".md-content").append(articleHtml);
+                    
+                    // 分页的展示
+                    var currentPage = data.pageNum;
+                    var totalPages = data.totalPage;
+                    $(".page-num").text(currentPage + "/" + totalPages);
+
+                    // 设置分页按钮属性
+                    if (currentPage == 1) {
+                        $(".previous-page").removeClass("page-item").addClass("page-btn-invalid");
+                    }
+
+                    if (currentPage == totalPages) {
+                        $(".next-page").removeClass("page-item").addClass("page-btn-invalid");
+                    }
+
+                    // 分页的跳转
+                    $(".previous-page").click(function(){
+                        if(currentPage > 1) {
+                            window.location.href = frontUrl + "?p=" + (currentPage - 1);
+                        }
+                    });
+                    $(".next-page").click(function(){
+                        if(currentPage < totalPages) {
+                            window.location.href = frontUrl + "?p=" + (currentPage + 1);
+                        }
+                    });
+                } else {
+                    alert("系统错误，请稍后再试！")
+                }
             })
     }
 </script>
