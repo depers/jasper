@@ -8,6 +8,28 @@
     font-weight: 400;
 }
 
+.md-content__con {
+    margin-top: 1rem;
+    font-size: 16px;
+}
+
+.md-content__con pre {
+    margin-block-start: 12px;
+    margin-block-end: 12px;
+    margin-inline-start: 0;
+    margin-inline-end: 0;
+    padding-block-start: 12px;
+    padding-block-end: 12px;
+    padding-inline-start: 16px;
+    padding-inline-end: 16px;
+    overflow: auto;
+    white-space: pre;
+    word-wrap: normal;
+    border-radius: 7px;
+    font-weight: 400;
+    line-height: 1rem;
+}
+
 .md-comments {
     margin: 0 0.8rem;
     padding: 1.2rem 0 1.2rem;
@@ -71,6 +93,7 @@
     outline: none;
     border-radius: 4px;
     padding: 10px;
+    display: block;
 }
 
 .comment-btn {
@@ -78,7 +101,6 @@
     color: #fff;
     background-color: var(--main-bg-color);
     border: none;
-    display: block;
     border-radius: 3px;
     cursor: pointer;
     font-size: 0.7rem;
@@ -89,4 +111,16 @@
     box-shadow: 0 0 0.2rem rgb(0 0 0 / 10%), 0 0.2rem 0.4rem rgb(0 0 0 / 20%);
 }
 
+/* githun markdown文本 */
+.markdown-body {
+    box-sizing: border-box;
+    min-width: 200px;
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 45px 0;
+}
 
+.error-info {
+    color: red;
+    font-size: 0.6rem;
+}

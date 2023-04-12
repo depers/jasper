@@ -4,31 +4,19 @@
         "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
 
-    <properties>
-        <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
-        <property name="url" value="jdbc:mysql://localhost:3306/mybatis?serverTimezone=Asia/Shanghai"/>
-        <property name="username" value="root"/>
-        <property name="password" value="fx1212"/>
-    </properties>
+    <settings>
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+    </settings>
 
-    <!-- 定义数据库的信息，默认使用development数据库构建环境 -->
-    <environments default="development">
-        <environment id="development">
-            <transactionManager type="JDBC"/>
-            <dataSource type="POOLED">
-                <property name="driver" value="${driver}"/>
-                <property name="url" value="${url}"/>
-                <property name="username" value="${username}"/>
-                <property name="password" value="${password}"/>
-            </dataSource>
-        </environment>
-    </environments>
+    <typeAliases>
+        <package name="cn.bravedawn.web.mbg.model"/>
+    </typeAliases>
 
-    <!-- 定义映射器 -->
-    <mappers>
-        <mapper class=""/>
-    </mappers>
-
-
+    <plugins>
+        <plugin interceptor="cn.bravedawn.web.config.interceptor.MybatisInterceptor">
+            <property name="normalCost" value="200"/>
+            <property name="isOpenSqlFormat" value="true"/>
+        </plugin>
+    </plugins>
 
 </configuration>

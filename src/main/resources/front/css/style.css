@@ -132,7 +132,6 @@ p{
 .md-main__inner {
     display: flex;
     flex-direction: column;
-    margin-top: 1.5rem;
     font-family: quote, elipse, dash, emdash, HarmonyOS_Regular ;
 }
 
@@ -156,7 +155,7 @@ p{
 .md-content__word_small {
     text-align: center;
     font-size: 14px;
-    color: gray;
+    color: rgba(0,10,20,.4);
     line-height: 1.8;
 }
 

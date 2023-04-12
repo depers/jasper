@@ -78,7 +78,8 @@ public class DetailServiceImpl implements DetailService {
     public CommonResult<?> addComment(CommentReqDTO reqDTO) {
         // 判断用户频繁刷评论的控制：一个用户一个小时之内只能刷三条评论，超出的话拒绝
         int commentCount = commentMapper.selectCountOneHour(reqDTO.getEmail());
-        if (commentCount > 3) {
+        log.info("发表评论次数查询, email={}, count={}.", reqDTO.getEmail(), commentCount);
+        if (commentCount >= 3) {
             log.error("频繁发表评论, email={}.", reqDTO.getEmail());
             throw new BusinessException(ResultEnum.COMMENT_FREQUENT_ERROR);
         }

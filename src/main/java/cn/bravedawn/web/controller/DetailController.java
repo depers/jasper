@@ -56,14 +56,14 @@ public class DetailController {
             throw new BusinessException(ResultEnum.REQUEST_PARAMS_ERROR);
         }
 
-        if (StringUtils.isBlank(commentReqDTO.getNickname())) {
-            log.error("请求参数昵称为空");
-            throw new BusinessException(ResultEnum.COMMENT_NICKNAME_ERROR);
-        }
-
         if (StringUtils.isBlank(commentReqDTO.getContent())) {
             log.error("请求参数评论内容为空");
             throw new BusinessException(ResultEnum.COMMENT_CONTENT_ERROR);
+        }
+
+        if (StringUtils.isBlank(commentReqDTO.getNickname())) {
+            log.error("请求参数昵称为空");
+            throw new BusinessException(ResultEnum.COMMENT_NICKNAME_ERROR);
         }
 
         // 评论内容的长度不得大于100个字符

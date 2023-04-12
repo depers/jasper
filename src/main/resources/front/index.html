@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Jasper</title>
-    <link href="style.css" type="text/css" rel="stylesheet"/>
+    <link href="css/style.css" type="text/css" rel="stylesheet"/>
     <script src="js/jquery-3.6.4.js"></script>
     <script src="js/axios.js"></script>
 </head>
@@ -102,7 +102,8 @@
 
 <script type="text/javascript">
     const serverUrl = "";
-    const frontUrl = "http://localhost:8080/front/index.html"
+    const frontUrl = "http://localhost:8080/front/index.html";
+    const baseUrl = "http://localhost:8080/front";
     $(document).ready(function(){
 
         const url = new URL(window.location.href);
@@ -111,7 +112,6 @@
     });
 
     function requestIndex(page) {
-        console.log("page=" + page)
         if (page == "" || page == undefined) {
             page = 1;
         }
@@ -126,6 +126,7 @@
             })
             .catch(function (error) {
                 console.log(error.toJSON());
+                alert("系统错误，请稍后再试！");
             })
             .then(function (response) {
                 console.log(response.data);
@@ -136,7 +137,7 @@
                     var articleHtml = "";
                     data.list.forEach(element => {
                         var tagStr = element.tags.join("/");
-                        var jumpUrl = serverUrl + "/details.html"
+                        var jumpUrl = baseUrl + "/details.html?aid=" + element.articleId;
                         var ht = "<article class=\"md-content__inner md-typeset\">" +
                                  "<p class=\"md-content__word_small\">" + 
                                  element.tags.join(" / ") + 
@@ -184,7 +185,7 @@
                         }
                     });
                 } else {
-                    alert("系统错误，请稍后再试！")
+                    alert("系统错误，请稍后再试！");
                 }
             })
     }
