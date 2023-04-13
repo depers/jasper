@@ -3,23 +3,20 @@
 <mapper namespace="cn.bravedawn.web.mbg.mapper.ArticleMapper">
 
     <resultMap id="BaseResultMap" type="cn.bravedawn.web.mbg.model.Article">
-        <id column="id" jdbcType="BIGINT" property="id"/>
-        <result column="title" jdbcType="VARCHAR" property="title"/>
-        <result column="intro" jdbcType="VARCHAR" property="intro"/>
-        <result column="content" jdbcType="VARCHAR" property="content"/>
-        <result column="path" jdbcType="VARCHAR" property="path"/>
-        <result column="author" jdbcType="VARCHAR" property="author"/>
-        <result column="publish_date" jdbcType="DATE" property="publishDate"/>
-        <result column="insert_time" jdbcType="TIMESTAMP" property="insertTime"/>
-        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="title" jdbcType="VARCHAR" property="title" />
+        <result column="intro" jdbcType="VARCHAR" property="intro" />
+        <result column="path" jdbcType="VARCHAR" property="path" />
+        <result column="sign" jdbcType="VARCHAR" property="sign" />
+        <result column="author" jdbcType="VARCHAR" property="author" />
+        <result column="insert_time" jdbcType="TIMESTAMP" property="insertTime" />
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
     </resultMap>
-
     <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="cn.bravedawn.web.mbg.model.Article">
-        <result column="content" jdbcType="LONGVARCHAR" property="content"/>
+        <result column="content" jdbcType="LONGVARCHAR" property="content" />
     </resultMap>
-
     <sql id="Base_Column_List">
-        id, title, intro, content, path, author, publish_date, insert_time, update_time
+        id, title, intro, content, path, sign, author, insert_time, update_time
     </sql>
 
     <select id="selectArticleList" resultType="article">
@@ -29,16 +26,71 @@
             intro,
             insert_time
         FROM
-            article
+            `article`
     </select>
 
     <select id="selectById" resultType="article">
         SELECT
             <include refid="Base_Column_List"/>
         FROM
-            article
+            `article`
         where
             id = #{articleId}
     </select>
+
+    <select id="selectCountByMd5" parameterType="string" resultType="int">
+        select
+            count(*)
+        from
+            `article`
+        where
+            sign = #{sha}
+    </select>
+
+
+    <insert id="insertSelective" parameterType="article" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+            article
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="title != null">
+                title,
+            </if>
+            <if test="intro != null">
+                intro,
+            </if>
+            <if test="path != null">
+                path,
+            </if>
+            <if test="sign != null">
+                sign,
+            </if>
+            <if test="author != null">
+                author,
+            </if>
+            <if test="content != null">
+                content,
+            </if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="title != null">
+                #{title,jdbcType=VARCHAR},
+            </if>
+            <if test="intro != null">
+                #{intro,jdbcType=VARCHAR},
+            </if>
+            <if test="path != null">
+                #{path,jdbcType=VARCHAR},
+            </if>
+            <if test="sign != null">
+                #{sign,jdbcType=VARCHAR},
+            </if>
+            <if test="author != null">
+                #{author,jdbcType=VARCHAR},
+            </if>
+            <if test="content != null">
+                #{content,jdbcType=LONGVARCHAR},
+            </if>
+        </trim>
+    </insert>
 
 </mapper>

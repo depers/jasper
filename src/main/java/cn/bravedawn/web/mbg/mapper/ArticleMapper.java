@@ -9,4 +9,8 @@ public interface ArticleMapper {
     List<Article> selectArticleList();
 
     Article selectById(long articleId);
+
+    int selectCountByMd5(String sha);
+
+    int insertSelective(Article article);
 }

@@ -5,8 +5,8 @@ CREATE table `article`(
     `intro`        varchar(300) not null default '' comment '文章简介',
     `content`      text         not null            comment '文章内容',
     `path`         varchar(200) not null default '' comment '文章路径',
+    `sign`          varchar(50) not null default '' comment 'path的sha值',
     `author`       varchar(20)  not null default '' comment '作者',
-    `publish_date` date         not null comment '发布日期',
     `insert_time`  datetime     not null default current_timestamp comment '创建时间',
     `update_time`  datetime     not null default current_timestamp on update current_timestamp comment '更新时间',
     primary key (`id`)
@@ -15,12 +15,22 @@ CREATE table `article`(
 -- 标签表
 create table `tag`(
     `id`          bigint(11)  not null auto_increment comment '主键',
-    `article_id`  bigint(11)  not null comment '文章id',
     `name`        varchar(20) not null default '' comment '标签名称',
     `insert_time` datetime    not null default current_timestamp comment '创建时间',
     `update_time` datetime    not null default current_timestamp on update current_timestamp comment '更新时间',
     primary key (`id`)
 ) engine=InnoDB default charset=utf8mb4 comment '标签表';
+
+-- 文章标签关联表
+create table `article_tag_relation` (
+    `id`          bigint(11)  not null auto_increment comment '主键',
+    `article_id`  bigint(11)  not null comment '文章id',
+    `tag_id`      bigint(11)  not null comment '标签id',
+    `insert_time` datetime    not null default current_timestamp comment '创建时间',
+    `update_time` datetime    not null default current_timestamp on update current_timestamp comment '更新时间',
+    primary key (`id`)
+) engine=InnoDB default charset=utf8mb4 comment '文章标签关联表';
+
 
 -- 评论表
 create table `comment`(

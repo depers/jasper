@@ -13,12 +13,25 @@
     </sql>
 
     <select id="selectTagNameByArticleId" resultType="string">
-        select
+        SELECT
             name
-        from
+        FROM
             tag
-        where
-            article_id = #{articleId}
+        LEFT JOIN article_tag_relation atr ON atr.tag_id = tag.id
+        WHERE
+            atr.article_id = #{articleId}
     </select>
+
+
+    <insert id="insertBatch" useGeneratedKeys="true" keyProperty="id">
+        insert into
+            tag (name)
+        values
+        <foreach collection="tagList" index="index" item="item" separator="," >
+            <if test="item != null">
+                (#{item.name})
+            </if>
+        </foreach>
+    </insert>
 
 </mapper>
