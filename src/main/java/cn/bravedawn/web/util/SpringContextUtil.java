@@ -1,8 +1,10 @@
 package cn.bravedawn.web.util;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
 
 /**
  * @author : depers
@@ -10,8 +12,9 @@ import org.springframework.context.ApplicationContextAware;
  * @description:
  * @date : Created in 2023/4/5 22:15
  */
-public class SpringContextUtil implements ApplicationContextAware {
 
+@Component
+public class SpringContextUtil implements ApplicationContextAware {
 
     private static ApplicationContext applicationContext;
 

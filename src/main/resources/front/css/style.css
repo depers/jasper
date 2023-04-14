@@ -75,7 +75,6 @@ p{
 }
 
 .md-header__title {
-    margin-left: 0.5rem;
     margin-right: 0.4rem;
     font-size: .9rem;
     line-height: 2.4rem;
@@ -238,7 +237,8 @@ p{
 /* 底部 */
 .foot-bg {
     padding: 0.8rem;
-    background: #efefef;
+    background: var(--main-bg-color);
     text-align: center;
     font-size: 13px;
+    color: #fff;
 }

@@ -42,7 +42,4 @@ public class JasperTransactionManager {
         transactionManager.rollback(transactionStatus);
     }
 
-
-    
-
 }

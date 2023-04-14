@@ -26,14 +26,14 @@
             intro,
             insert_time
         FROM
-            `article`
+            article
     </select>
 
     <select id="selectById" resultType="article">
         SELECT
             <include refid="Base_Column_List"/>
         FROM
-            `article`
+            article
         where
             id = #{articleId}
     </select>
@@ -42,7 +42,7 @@
         select
             count(*)
         from
-            `article`
+            article
         where
             sign = #{sha}
     </select>

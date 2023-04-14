@@ -12,4 +12,14 @@
         id, article_id, tag_id, insert_time, update_time
     </sql>
 
+
+    <insert id="batchInsert">
+        INSERT INTO
+            article_tag_relation (article_id, tag_id)
+        VALUES
+        <foreach collection="list" separator="," item="item">
+            (#{item.articleId}, #{item.tagId})
+        </foreach>
+    </insert>
+
 </mapper>

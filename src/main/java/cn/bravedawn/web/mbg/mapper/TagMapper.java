@@ -10,5 +10,5 @@ public interface TagMapper {
 
     List<String> selectTagNameByArticleId(long article);
 
-    int insertBatch(@Param("tagList") List<Tag> tagList);
+    int batchInsert(List<Tag> tagList);
 }

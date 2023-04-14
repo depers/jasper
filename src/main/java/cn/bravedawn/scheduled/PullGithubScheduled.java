@@ -2,9 +2,12 @@ package cn.bravedawn.scheduled;
 
 import cn.bravedawn.scheduled.dto.GithubContent;
 import cn.bravedawn.scheduled.dto.KeyNodeInfo;
+import cn.bravedawn.web.db.JasperTransactionManager;
 import cn.bravedawn.web.mbg.mapper.ArticleMapper;
+import cn.bravedawn.web.mbg.mapper.ArticleTagRelationMapper;
 import cn.bravedawn.web.mbg.mapper.TagMapper;
 import cn.bravedawn.web.mbg.model.Article;
+import cn.bravedawn.web.mbg.model.ArticleTagRelation;
 import cn.bravedawn.web.mbg.model.Tag;
 import cn.bravedawn.web.util.Base64Util;
 import cn.bravedawn.web.util.ShaUtil;
@@ -44,11 +47,16 @@ public class PullGithubScheduled {
 
     private static final Logger log = LoggerFactory.getLogger(PullGithubScheduled.class);
 
+    private final static String BASE_URL = "https://api.github.com/repos/depers/jasper-db/contents/";
+
     @Autowired
     private ArticleMapper articleMapper;
 
     @Autowired
     private TagMapper tagMapper;
+
+    @Autowired
+    private ArticleTagRelationMapper articleTagRelationMapper;
 
     private static ObjectMapper mapper;
     private static List<GithubContent> githubContentList = new ArrayList<>();
@@ -63,8 +71,6 @@ public class PullGithubScheduled {
         mapper.registerModule(module);
     }
 
-    private final static String base_url = "https://api.github.com/repos/depers/jasper-db/contents/";
-
     @Scheduled(cron = "0 0/1 * * * ?")
     public void runTask() {
         try {
@@ -76,7 +82,6 @@ public class PullGithubScheduled {
             }
             // 将文章信息存库
             saveGithubContentList(githubContentList);
-            System.out.println(githubContentList);
             log.info(">>>>>>>>>>>>>>>>>>>>>>>>拉取Github上的数据结束。");
 
         } catch (Throwable e) {
@@ -102,35 +107,51 @@ public class PullGithubScheduled {
             // 从正文中移除标签和介绍
             KeyNodeInfo keyNodeInfo = keyNodeInfoMap.get(sign);
             if (keyNodeInfo != null) {
-                articleContent.replace("> " + keyNodeInfo.getKeyWord() + "\n\n", "");
-                articleContent.replace("> " + keyNodeInfo.getIntro() + "\n\n", "");
+                // 保证事务
+                JasperTransactionManager transactionManager = new JasperTransactionManager();
+                try {
+                    // 去除引用标签
+                    articleContent = articleContent.replaceAll("(&gt;|\\>)(.*)", "");
 
-                System.out.println(articleContent);
-                // 整理article信息
-                article.setTitle(content.getName());
-                article.setIntro(keyNodeInfo.getIntro());
-                article.setAuthor("depers");
-                article.setContent(articleContent);
-                article.setSign(sign);
-                article.setPath(content.getPath());
-                articleMapper.insertSelective(article);
-                // 整理tag信息
-                List<String> tagList = Arrays.asList(keyNodeInfo.getKeyWord().split("/"));
-                List<Tag> tags = new ArrayList<>();
-                for (String name : tagList) {
-                    Tag tag = new Tag();
-                    tag.setName(name);
-                    tags.add(tag);
+                    // 整理article信息
+                    int index = content.getName().indexOf(".");
+                    article.setTitle(content.getName().substring(0, index));
+                    article.setIntro(keyNodeInfo.getIntro());
+                    article.setAuthor("depers");
+                    article.setContent(articleContent);
+                    article.setSign(sign);
+                    article.setPath(content.getPath());
+                    articleMapper.insertSelective(article);
+
+                    // 整理tag信息
+                    List<String> tagList = Arrays.asList(keyNodeInfo.getKeyWord().split("/"));
+                    List<Tag> tags = new ArrayList<>();
+                    for (String name : tagList) {
+                        Tag tag = new Tag();
+                        tag.setName(name);
+                        tags.add(tag);
+                    }
+                    tagMapper.batchInsert(tags);
+
+                    // 维护文章和标签的关系表
+                    List<ArticleTagRelation> articleTagRelationList = new ArrayList<>();
+                    for (Tag tag : tags) {
+                        ArticleTagRelation articleTagRelation = new ArticleTagRelation();
+                        articleTagRelation.setArticleId(article.getId());
+                        articleTagRelation.setTagId(tag.getId());
+                        articleTagRelationList.add(articleTagRelation);
+                    }
+                    articleTagRelationMapper.batchInsert(articleTagRelationList);
+
+                    // 提交事务
+                    transactionManager.commit();
+                } catch (Throwable e) {
+                    // 回滚事务
+                    transactionManager.rollback();
+                    log.error("批量拉取数据事务回滚", e);
                 }
-                log.info("tags=" + tags);
-                tagMapper.insertBatch(tags);
-
-
-                // 维护文章和标签的关系表
             }
-
         }
-
     }
 
 
@@ -138,7 +159,7 @@ public class PullGithubScheduled {
         // 遍历项目目录，解析到最深层文件目录
         // 1.发送请求获取根目录信息
         CloseableHttpClient httpclient = HttpClients.createDefault();
-        HttpGet httpget = new HttpGet(base_url + path);
+        HttpGet httpget = new HttpGet(BASE_URL + path);
         httpget.addHeader("Authorization", "Bearer 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");
 
         ResponseHandler< String > responseHandler = response -> {
@@ -188,17 +209,18 @@ public class PullGithubScheduled {
         } else {
             return true;
         }
-
     }
 
-    class KeyNodeVisitor extends AbstractVisitor {
 
+    /**
+     * 获取引用标签的数据
+     */
+    class KeyNodeVisitor extends AbstractVisitor {
         private String sign;
 
         public KeyNodeVisitor(String sign) {
             this.sign = sign;
         }
-
 
         @Override
         public void visit(BlockQuote blockQuote) {
@@ -209,14 +231,5 @@ public class PullGithubScheduled {
             }
         }
     }
-
-
-    public static void main(String[] args) {
-        PullGithubScheduled pullGithubScheduled = new PullGithubScheduled();
-        pullGithubScheduled.runTask();
-    }
-
-
-
-
+    
 }

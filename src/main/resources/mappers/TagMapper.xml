@@ -23,7 +23,7 @@
     </select>
 
 
-    <insert id="insertBatch" useGeneratedKeys="true" keyProperty="id">
+    <insert id="batchInsert" useGeneratedKeys="true" keyProperty="id">
         insert into
             tag (name)
         values

@@ -1,6 +1,7 @@
 package cn.bravedawn.web.config.interceptor;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.ibatis.binding.MapperMethod;
 import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.ParameterMapping;
@@ -16,10 +17,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.sql.Statement;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * @author : depers
@@ -112,9 +110,50 @@ public class MybatisInterceptor implements Interceptor {
         // 规整sql
         sql = sql.replaceAll("[\\s]+", " ");
         if (parameterMappingList.size() > 0 && parameterObject != null) {
-            sql = handleCommonParameter(sql, parameterMappingList, parameterObject);
+            // 针对foreach标签中传一个数组过来的处理
+            if (parameterObject instanceof MapperMethod.ParamMap) {
+                sql = handleParamMapParameter(sql, parameterMappingList, parameterObject);
+            } else {
+                sql = handleCommonParameter(sql, parameterMappingList, parameterObject);
+            }
         }
         return sql;
+    }
+
+    private String handleParamMapParameter(String sql, List<ParameterMapping> parameterMappingList, Object parameterObject) {
+        Map parameterMap = (Map) parameterObject;
+        List<?> list = (List<?>) parameterMap.get("list");
+
+        // 获取对象属性名
+        List<String> propertyNameList = new ArrayList<>();
+        for (ParameterMapping parameterMapping : parameterMappingList) {
+            String propertyName = parameterMapping.getProperty();
+            if (propertyName.contains(".")) {
+                String objectName = propertyName.substring(propertyName.indexOf(".") + 1);
+                if (!propertyNameList.contains(objectName)) {
+                    propertyNameList.add(objectName);
+                }
+            }
+        }
+
+        // 从对象中获取属性值
+        for (Object obj : list) {
+            for (String propertyName : propertyNameList) {
+                Object propertyValue = getFieldValue(obj, propertyName);
+
+                if (propertyValue != null) {
+                    if (propertyValue.getClass().isAssignableFrom(String.class)) {
+                        propertyValue = "\'" + propertyValue + "\'";
+                    }
+                } else {
+                    propertyValue = "\'" + propertyValue + "\'";
+                }
+
+                sql = sql.replaceFirst("\\?", propertyValue.toString());
+            }
+        }
+        return sql;
+
     }
 
     private String handleCommonParameter(String sql, List<ParameterMapping> parameterMappingList, Object parameterObject) {
@@ -125,10 +164,10 @@ public class MybatisInterceptor implements Interceptor {
             } else {
                 String propertyName = parameterMapping.getProperty();
                 propertyValue = String.valueOf(getFieldValue(parameterObject, propertyName));
-                if (parameterMapping.getJavaType().isAssignableFrom(String.class) && propertyValue != null) {
-                    propertyValue = "\'" + propertyValue + "\'";
-                }
+            }
 
+            if (parameterMapping.getJavaType().isAssignableFrom(String.class) && propertyValue != null) {
+                propertyValue = "\'" + propertyValue + "\'";
             }
 
             sql = sql.replaceFirst("\\?", propertyValue);
