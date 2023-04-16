@@ -231,5 +231,5 @@ public class PullGithubScheduled {
             }
         }
     }
-    
+
 }
