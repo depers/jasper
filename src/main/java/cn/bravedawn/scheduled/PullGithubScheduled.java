@@ -127,17 +127,26 @@ public class PullGithubScheduled {
 
                     // 整理tag信息
                     List<String> tagList = Arrays.asList(keyNodeInfo.getKeyWord().split("/"));
-                    List<Tag> tags = new ArrayList<>();
+                    List<Tag> maintainTags = new ArrayList<>();
+                    List<Tag> waitTags = new ArrayList<>();
                     for (String name : tagList) {
+                        // 判断该tag是否在数据库中，若在则不插入数据库
+                        Tag existTag = tagMapper.selectCount(name);
+                        if (existTag != null) {
+                            maintainTags.add(existTag);
+                            continue;
+                        }
+
                         Tag tag = new Tag();
                         tag.setName(name);
-                        tags.add(tag);
+                        waitTags.add(tag);
                     }
-                    tagMapper.batchInsert(tags);
+                    tagMapper.batchInsert(waitTags);
+                    maintainTags.addAll(waitTags);
 
                     // 维护文章和标签的关系表
                     List<ArticleTagRelation> articleTagRelationList = new ArrayList<>();
-                    for (Tag tag : tags) {
+                    for (Tag tag : maintainTags) {
                         ArticleTagRelation articleTagRelation = new ArticleTagRelation();
                         articleTagRelation.setArticleId(article.getId());
                         articleTagRelation.setTagId(tag.getId());

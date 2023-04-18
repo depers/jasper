@@ -11,4 +11,6 @@ public interface TagMapper {
     List<String> selectTagNameByArticleId(long article);
 
     int batchInsert(List<Tag> tagList);
+
+    Tag selectCount(String name);
 }

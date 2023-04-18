@@ -3,13 +3,12 @@
 <mapper namespace="cn.bravedawn.web.mbg.mapper.TagMapper">
     <resultMap id="BaseResultMap" type="cn.bravedawn.web.mbg.model.Tag">
         <id column="id" jdbcType="BIGINT" property="id"/>
-        <result column="article_id" jdbcType="BIGINT" property="articleId"/>
         <result column="name" jdbcType="VARCHAR" property="name"/>
         <result column="insert_time" jdbcType="TIMESTAMP" property="insertTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
     </resultMap>
     <sql id="Base_Column_List">
-        id, article_id, name, insert_time, update_time
+        id,  name, insert_time, update_time
     </sql>
 
     <select id="selectTagNameByArticleId" resultType="string">
@@ -33,5 +32,14 @@
             </if>
         </foreach>
     </insert>
+
+    <select id="selectCount" resultType="tag" parameterType="string">
+        SELECT
+            <include refid="Base_Column_List"/>
+        FROM
+            tag
+        WHERE
+            name = #{name}
+    </select>
 
 </mapper>
