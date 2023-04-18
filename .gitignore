@@ -40,6 +40,9 @@ target/
 *.iml
 *.iws
 
+# custome ignore
+*.1
+
 # system ignore
 .DS_Store
 Thumbs.db

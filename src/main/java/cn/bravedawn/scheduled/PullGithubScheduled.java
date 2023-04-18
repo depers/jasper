@@ -2,6 +2,7 @@ package cn.bravedawn.scheduled;
 
 import cn.bravedawn.scheduled.dto.GithubContent;
 import cn.bravedawn.scheduled.dto.KeyNodeInfo;
+import cn.bravedawn.web.config.GithubConfig;
 import cn.bravedawn.web.db.JasperTransactionManager;
 import cn.bravedawn.web.mbg.mapper.ArticleMapper;
 import cn.bravedawn.web.mbg.mapper.ArticleTagRelationMapper;
@@ -47,8 +48,6 @@ public class PullGithubScheduled {
 
     private static final Logger log = LoggerFactory.getLogger(PullGithubScheduled.class);
 
-    private final static String BASE_URL = "https://api.github.com/repos/depers/jasper-db/contents/";
-
     @Autowired
     private ArticleMapper articleMapper;
 
@@ -57,6 +56,9 @@ public class PullGithubScheduled {
 
     @Autowired
     private ArticleTagRelationMapper articleTagRelationMapper;
+
+    @Autowired
+    private GithubConfig githubConfig;
 
     private static ObjectMapper mapper;
     private static List<GithubContent> githubContentList = new ArrayList<>();
@@ -155,12 +157,12 @@ public class PullGithubScheduled {
     }
 
 
-    private static String pullData(String path) throws IOException {
+    private String pullData(String path) throws IOException {
         // 遍历项目目录，解析到最深层文件目录
         // 1.发送请求获取根目录信息
         CloseableHttpClient httpclient = HttpClients.createDefault();
-        HttpGet httpget = new HttpGet(BASE_URL + path);
-        httpget.addHeader("Authorization", "Bearer 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");
+        HttpGet httpget = new HttpGet(githubConfig.getRepoUrl() + path);
+        httpget.addHeader("Authorization", githubConfig.getAccessToken());
 
         ResponseHandler< String > responseHandler = response -> {
             int status = response.getStatusLine().getStatusCode();
