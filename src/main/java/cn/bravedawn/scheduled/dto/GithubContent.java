@@ -11,8 +11,11 @@ public class GithubContent {
     private String name;
     private String path;
     private String type;
-
     private String content;
+    /**
+     * 是否已经存在，若存在则更新文章内容
+     */
+    private boolean isExist;
 
     public GithubContent(String name, String path, String type) {
         this.name = name;
@@ -59,6 +62,14 @@ public class GithubContent {
         this.type = type;
     }
 
+    public boolean getIsExist() {
+        return isExist;
+    }
+
+    public void setIsExist(boolean exist) {
+        isExist = exist;
+    }
+
     @Override
     public String toString() {
         return "GithubContent{" +
@@ -66,6 +77,7 @@ public class GithubContent {
                 ", path='" + path + '\'' +
                 ", type='" + type + '\'' +
                 ", content='" + content + '\'' +
+                ", isExist='" + isExist + '\'' +
                 '}';
     }
 }

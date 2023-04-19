@@ -11,6 +11,7 @@ import cn.bravedawn.web.mbg.model.Article;
 import cn.bravedawn.web.mbg.model.ArticleTagRelation;
 import cn.bravedawn.web.mbg.model.Tag;
 import cn.bravedawn.web.util.Base64Util;
+import cn.bravedawn.web.util.CollectionUtil;
 import cn.bravedawn.web.util.ShaUtil;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,6 +36,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * @author : depers
@@ -97,70 +99,147 @@ public class PullGithubScheduled {
     private void saveGithubContentList(List<GithubContent> githubContentList) {
         List<Article> articleList = new ArrayList<>();
         for (GithubContent content : githubContentList) {
-            Article article = new Article();
-            String articleContent = Base64Util.decode(content.getContent());
-            String sign = ShaUtil.sign(content.getPath());
-            // 解析markdown
-            Parser parser = Parser.builder().build();
-            Node document = parser.parse(articleContent);
-            // 解析标签和介绍
-            KeyNodeVisitor keyNodeVisitor = new KeyNodeVisitor(sign);
-            document.accept(keyNodeVisitor);
-            // 从正文中移除标签和介绍
-            KeyNodeInfo keyNodeInfo = keyNodeInfoMap.get(sign);
-            if (keyNodeInfo != null) {
-                // 保证事务
-                JasperTransactionManager transactionManager = new JasperTransactionManager();
-                try {
-                    // 去除引用标签
-                    articleContent = articleContent.replaceAll("(&gt;|\\>)(.*)", "");
+            if (content.getIsExist()) {
+                // 老文章的处理逻辑
+                oldestArticleHandler(content);
+            } else {
+                // 新文章的处理逻辑
+                newestArticleHandler(content);
+            }
+        }
+    }
 
-                    // 整理article信息
-                    int index = content.getName().indexOf(".");
-                    article.setTitle(content.getName().substring(0, index));
-                    article.setIntro(keyNodeInfo.getIntro());
-                    article.setAuthor("depers");
-                    article.setContent(articleContent);
-                    article.setSign(sign);
-                    article.setPath(content.getPath());
-                    articleMapper.insertSelective(article);
+    private Article buildArticle(GithubContent content) {
+        Article article = new Article();
+        String articleContent = Base64Util.decode(content.getContent());
+        String sign = ShaUtil.sign(content.getPath());
+        // 解析markdown
+        Parser parser = Parser.builder().build();
+        Node document = parser.parse(articleContent);
+        // 解析标签和介绍
+        KeyNodeVisitor keyNodeVisitor = new KeyNodeVisitor(sign);
+        document.accept(keyNodeVisitor);
+        // 从正文中移除标签和介绍
+        KeyNodeInfo keyNodeInfo = keyNodeInfoMap.get(sign);
+        if(keyNodeInfo != null) {
+            // 去除引用标签
+            articleContent = articleContent.replaceAll(">\\s+" + keyNodeInfo.getKeyWord(), "");
+            articleContent = articleContent.replaceAll(">\\s+" + keyNodeInfo.getIntro(), "");
+            // 整理article信息
+            int index = content.getName().indexOf(".");
+            article.setTitle(content.getName().substring(0, index));
+            article.setIntro(keyNodeInfo.getIntro());
+            article.setAuthor("depers");
+            article.setContent(articleContent);
+            article.setSign(sign);
+            article.setPath(content.getPath());
+            return article;
+        } else {
+            return null;
+        }
+    }
 
-                    // 整理tag信息
-                    List<String> tagList = Arrays.asList(keyNodeInfo.getKeyWord().split("/"));
-                    List<Tag> maintainTags = new ArrayList<>();
-                    List<Tag> waitTags = new ArrayList<>();
-                    for (String name : tagList) {
-                        // 判断该tag是否在数据库中，若在则不插入数据库
-                        Tag existTag = tagMapper.selectCount(name);
-                        if (existTag != null) {
-                            maintainTags.add(existTag);
-                            continue;
-                        }
+    private List<Tag> buildTags(String keyword) {
+        // 整理tag信息
+        List<String> tagList = Arrays.asList(keyword.split("/"));
+        List<Tag> maintainTags = new ArrayList<>();
+        List<Tag> waitTags = new ArrayList<>();
+        for (String name : tagList) {
+            // 判断该tag是否在数据库中，若在则不插入数据库
+            Tag existTag = tagMapper.selectCount(name);
+            if (existTag != null) {
+                maintainTags.add(existTag);
+                continue;
+            }
 
-                        Tag tag = new Tag();
-                        tag.setName(name);
-                        waitTags.add(tag);
-                    }
-                    tagMapper.batchInsert(waitTags);
-                    maintainTags.addAll(waitTags);
+            Tag tag = new Tag();
+            tag.setName(name);
+            waitTags.add(tag);
+        }
 
-                    // 维护文章和标签的关系表
-                    List<ArticleTagRelation> articleTagRelationList = new ArrayList<>();
-                    for (Tag tag : maintainTags) {
-                        ArticleTagRelation articleTagRelation = new ArticleTagRelation();
-                        articleTagRelation.setArticleId(article.getId());
-                        articleTagRelation.setTagId(tag.getId());
-                        articleTagRelationList.add(articleTagRelation);
-                    }
-                    articleTagRelationMapper.batchInsert(articleTagRelationList);
+        if (!waitTags.isEmpty()) {
+            tagMapper.batchInsert(waitTags);
+        }
+        maintainTags.addAll(waitTags);
+        return maintainTags;
+    }
 
-                    // 提交事务
-                    transactionManager.commit();
-                } catch (Throwable e) {
-                    // 回滚事务
-                    transactionManager.rollback();
-                    log.error("批量拉取数据事务回滚", e);
-                }
+
+    private void buildArticleTagsRela(long articleId, List<Tag> maintainTags) {
+        // 维护文章和标签的关系表
+        List<ArticleTagRelation> articleTagRelationList = new ArrayList<>();
+        for (Tag tag : maintainTags) {
+            ArticleTagRelation articleTagRelation = new ArticleTagRelation();
+            articleTagRelation.setArticleId(articleId);
+            articleTagRelation.setTagId(tag.getId());
+            articleTagRelationList.add(articleTagRelation);
+        }
+        articleTagRelationMapper.batchInsert(articleTagRelationList);
+
+    }
+
+    private void oldestArticleHandler(GithubContent content) {
+        /**
+         * 如果是老文章
+         *  1.更新文章内容
+         *  2.插入标签
+         *  3.判断标签的结构是否发生变化，若发生则删除原有文章的标签相关的关联，重新插入标签结构
+         */
+        // 手动事务
+        JasperTransactionManager transactionManager = new JasperTransactionManager();
+        try {
+            Article article = buildArticle(content);
+            if (article == null) {
+                return;
+            }
+            articleMapper.updateSelective(article);
+
+            article = articleMapper.selectBySign(article.getSign());
+            KeyNodeInfo keyNodeInfo = keyNodeInfoMap.get(article.getSign());
+            // 文章最新的标签
+            List<Tag> tags = buildTags(keyNodeInfo.getKeyWord());
+            List<String> newTags = tags.stream().map(Tag::getName).toList();
+
+            // 判断文章的标签是否发生变化
+            List<String> dataTags = articleTagRelationMapper.selectTagNameByArticleId(article.getId());
+            if (!CollectionUtil.judgeEquals(newTags, dataTags)) {
+                // 若发生变化则删除原有的标签关联，重新插入
+                articleTagRelationMapper.deleteByArticle(article.getId());
+                buildArticleTagsRela(article.getId(), tags);
+            }
+
+            // 提交事务
+            transactionManager.commit();
+        } catch (Throwable e) {
+            // 回滚事务
+            transactionManager.rollback();
+            log.error("批量拉取数据事务回滚", e);
+        }
+    }
+
+
+    private void newestArticleHandler(GithubContent content) {
+        Article article = buildArticle(content);
+        if (article == null) {
+            return;
+        }
+
+        KeyNodeInfo keyNodeInfo = keyNodeInfoMap.get(article.getSign());
+        if (keyNodeInfo != null) {
+            // 手动事务
+            JasperTransactionManager transactionManager = new JasperTransactionManager();
+            try {
+                articleMapper.insertSelective(article);
+
+                List<Tag> tags = buildTags(keyNodeInfo.getKeyWord());
+
+                buildArticleTagsRela(article.getId(), tags);
+                // 提交事务
+                transactionManager.commit();
+            } catch (Throwable e) {
+                // 回滚事务
+                transactionManager.rollback();
+                log.error("批量拉取数据事务回滚", e);
             }
         }
     }
@@ -198,8 +277,12 @@ public class PullGithubScheduled {
                 // 判断是否是新文章，若是新文章则添加到githubContentList里，若不是则跳过
                 if (!isExistDatabase(item.getPath())) {
                     log.info("[{}]是新文章, path={}.", item.getName(), item.getPath());
-                    githubContentList.add(item);
+                    item.setIsExist(false);
+                } else {
+                    item.setIsExist(true);
                 }
+
+                githubContentList.add(item);
             }
             return;
         }
@@ -241,6 +324,18 @@ public class PullGithubScheduled {
                 keyNodeInfoMap.put(sign, new KeyNodeInfo(keywordNode.getLiteral(), introNode.getLiteral()));
             }
         }
+    }
+
+
+    public static void main(String[] args) {
+        String testStr1 = "> 1212";
+        String testStr2 = "<if> ";
+
+        String testStr3 = "> JVM/编程/Java\n" +
+                "\n" +
+                "> 这个简单介绍，Cron源自Unix/Linux系统自带的crond守护进程，以一个简洁的表达式定义任务触发时间。在Spring中，也可以使用Cron表达式来执行Cron任务，在Spring中。";
+
+        System.out.println(testStr3.replaceAll(">\\s+" + "JVM/编程/Java", ""));
     }
 
 }

@@ -34,8 +34,17 @@
             <include refid="Base_Column_List"/>
         FROM
             article
-        where
+        WHERE
             id = #{articleId}
+    </select>
+
+    <select id="selectBySign" resultType="article">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+            article
+        WHERE
+            sign = #{sign}
     </select>
 
     <select id="selectCountByMd5" parameterType="string" resultType="int">
@@ -92,5 +101,19 @@
             </if>
         </trim>
     </insert>
+
+    <update id="updateSelective" parameterType="article">
+        update
+            article
+        <set>
+            <if test="intro != null">
+                intro = #{intro},
+            </if>
+            <if test="content != null">
+                content = #{content},
+            </if>
+        </set>
+        where sign = #{sign}
+    </update>
 
 </mapper>

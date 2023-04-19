@@ -8,4 +8,8 @@ public interface ArticleTagRelationMapper {
 
     int batchInsert(List<ArticleTagRelation> list);
 
+    List<String> selectTagNameByArticleId(long articleId);
+
+    int deleteByArticle(long articleId);
+
 }

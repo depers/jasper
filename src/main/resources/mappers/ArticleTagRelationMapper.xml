@@ -22,4 +22,23 @@
         </foreach>
     </insert>
 
+    <select id="selectTagNameByArticleId" resultType="string">
+        SELECT
+            t.name
+        FROM
+            article_tag_relation atr
+        LEFT JOIN tag t ON t.id = atr.tag_id
+        WHERE
+            atr.article_id = #{articleId}
+    </select>
+
+
+    <delete id="deleteByArticle" >
+        DELETE
+        FROM
+            article_tag_relation
+        WHERE
+            article_id = #{articleId}
+    </delete>
+
 </mapper>

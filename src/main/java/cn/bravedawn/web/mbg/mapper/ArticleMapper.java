@@ -13,4 +13,8 @@ public interface ArticleMapper {
     int selectCountByMd5(String sha);
 
     int insertSelective(Article article);
+
+    int updateSelective(Article article);
+
+    Article selectBySign(String sign);
 }
