@@ -101,9 +101,11 @@ public class PullGithubScheduled {
         for (GithubContent content : githubContentList) {
             if (content.getIsExist()) {
                 // 老文章的处理逻辑
+                log.info("更新老文章的内容, title={}.", content.getName());
                 oldestArticleHandler(content);
             } else {
                 // 新文章的处理逻辑
+                log.info("插入新文章的内容, title={}.", content.getName());
                 newestArticleHandler(content);
             }
         }
@@ -126,7 +128,7 @@ public class PullGithubScheduled {
             articleContent = articleContent.replaceAll(">\\s+" + keyNodeInfo.getKeyWord(), "");
             articleContent = articleContent.replaceAll(">\\s+" + keyNodeInfo.getIntro(), "");
             // 整理article信息
-            int index = content.getName().indexOf(".");
+            int index = content.getName().lastIndexOf(".");
             article.setTitle(content.getName().substring(0, index));
             article.setIntro(keyNodeInfo.getIntro());
             article.setAuthor("depers");
@@ -327,15 +329,5 @@ public class PullGithubScheduled {
     }
 
 
-    public static void main(String[] args) {
-        String testStr1 = "> 1212";
-        String testStr2 = "<if> ";
-
-        String testStr3 = "> JVM/编程/Java\n" +
-                "\n" +
-                "> 这个简单介绍，Cron源自Unix/Linux系统自带的crond守护进程，以一个简洁的表达式定义任务触发时间。在Spring中，也可以使用Cron表达式来执行Cron任务，在Spring中。";
-
-        System.out.println(testStr3.replaceAll(">\\s+" + "JVM/编程/Java", ""));
-    }
 
 }

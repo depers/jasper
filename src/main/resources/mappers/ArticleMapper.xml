@@ -27,6 +27,7 @@
             insert_time
         FROM
             article
+        ORDER BY id DESC
     </select>
 
     <select id="selectById" resultType="article">
