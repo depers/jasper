@@ -260,7 +260,7 @@ public class PullGithubScheduled {
                 HttpEntity entity = response.getEntity();
                 return entity != null ? EntityUtils.toString(entity) : null;
             } else {
-                log.error("请求Github报错");
+                log.error("请求Github报错, status={}, body={}.", status, EntityUtils.toString(response.getEntity()));
                 return null;
             }
         };
