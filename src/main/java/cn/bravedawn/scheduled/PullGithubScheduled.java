@@ -87,7 +87,6 @@ public class PullGithubScheduled {
             // 将文章信息存库
             saveGithubContentList(githubContentList);
             log.info(">>>>>>>>>>>>>>>>>>>>>>>>拉取Github上的数据结束。");
-
         } catch (Throwable e) {
             log.error("定时任务失败，请稍后再试.", e);
         } finally {
@@ -96,6 +95,11 @@ public class PullGithubScheduled {
         }
     }
 
+
+    /**
+     * 保存文章
+     * @param githubContentList
+     */
     private void saveGithubContentList(List<GithubContent> githubContentList) {
         List<Article> articleList = new ArrayList<>();
         for (GithubContent content : githubContentList) {
@@ -115,12 +119,17 @@ public class PullGithubScheduled {
         Article article = new Article();
         String articleContent = Base64Util.decode(content.getContent());
         String sign = ShaUtil.sign(content.getPath());
+
         // 解析markdown
         Parser parser = Parser.builder().build();
         Node document = parser.parse(articleContent);
+
+
+
         // 解析标签和介绍
         KeyNodeVisitor keyNodeVisitor = new KeyNodeVisitor(sign);
         document.accept(keyNodeVisitor);
+
         // 从正文中移除标签和介绍
         KeyNodeInfo keyNodeInfo = keyNodeInfoMap.get(sign);
         if(keyNodeInfo != null) {
@@ -140,6 +149,7 @@ public class PullGithubScheduled {
             return null;
         }
     }
+
 
     private List<Tag> buildTags(String keyword) {
         // 整理tag信息
@@ -270,6 +280,11 @@ public class PullGithubScheduled {
 
     }
 
+    /**
+     * 校验文章是新文章还是老文件
+     * @param content
+     * @throws Exception
+     */
     public void checkFile(GithubContent content) throws Exception {
         if (content.getType().equals("file")) {
             log.info("拉取文章内容, path={}.", content.getPath());
