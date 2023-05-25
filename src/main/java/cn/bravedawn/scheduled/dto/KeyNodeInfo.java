@@ -11,6 +11,8 @@ public class KeyNodeInfo {
     private String keyWord;
     private String intro;
 
+    public KeyNodeInfo(){}
+
     public KeyNodeInfo(String keyWord, String intro) {
         this.keyWord = keyWord;
         this.intro = intro;

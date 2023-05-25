@@ -2,6 +2,7 @@ package cn.bravedawn.scheduled;
 
 import cn.bravedawn.scheduled.dto.GithubContent;
 import cn.bravedawn.scheduled.dto.KeyNodeInfo;
+import cn.bravedawn.scheduled.markdown.KeyNodeVisitor;
 import cn.bravedawn.web.config.GithubConfig;
 import cn.bravedawn.web.db.JasperTransactionManager;
 import cn.bravedawn.web.mbg.mapper.ArticleMapper;
@@ -62,9 +63,12 @@ public class PullGithubScheduled {
     @Autowired
     private GithubConfig githubConfig;
 
-    private static ObjectMapper mapper;
+    @Autowired
+    private KeyNodeVisitor keyNodeVisitor;
+
+    private static final ObjectMapper mapper;
+
     private static List<GithubContent> githubContentList = new ArrayList<>();
-    private static Map<String, KeyNodeInfo> keyNodeInfoMap = new HashMap<>();
 
     static {
         mapper = new ObjectMapper();
@@ -91,7 +95,6 @@ public class PullGithubScheduled {
             log.error("定时任务失败，请稍后再试.", e);
         } finally {
             githubContentList.clear();
-            keyNodeInfoMap.clear();
         }
     }
 
@@ -115,7 +118,7 @@ public class PullGithubScheduled {
         }
     }
 
-    private Article buildArticle(GithubContent content) {
+    private Article buildArticle(GithubContent content, KeyNodeInfo keyNodeInfo) {
         Article article = new Article();
         String articleContent = Base64Util.decode(content.getContent());
         String sign = ShaUtil.sign(content.getPath());
@@ -124,15 +127,13 @@ public class PullGithubScheduled {
         Parser parser = Parser.builder().build();
         Node document = parser.parse(articleContent);
 
-
-
-        // 解析标签和介绍
-        KeyNodeVisitor keyNodeVisitor = new KeyNodeVisitor(sign);
+        // 解析标签和介绍、下载图片
         document.accept(keyNodeVisitor);
 
         // 从正文中移除标签和介绍
-        KeyNodeInfo keyNodeInfo = keyNodeInfoMap.get(sign);
-        if(keyNodeInfo != null) {
+        KeyNodeInfo info = keyNodeVisitor.getKeyNodeInfo();
+        if(info != null) {
+            keyNodeInfo = info;
             // 去除引用标签
             articleContent = articleContent.replaceAll(">\\s+" + keyNodeInfo.getKeyWord(), "");
             articleContent = articleContent.replaceAll(">\\s+" + keyNodeInfo.getIntro(), "");
@@ -190,6 +191,10 @@ public class PullGithubScheduled {
 
     }
 
+    /**
+     * 如果是已经存在数据库的文章，我们称为老数据
+     * @param content
+     */
     private void oldestArticleHandler(GithubContent content) {
         /**
          * 如果是老文章
@@ -200,14 +205,14 @@ public class PullGithubScheduled {
         // 手动事务
         JasperTransactionManager transactionManager = new JasperTransactionManager();
         try {
-            Article article = buildArticle(content);
+            KeyNodeInfo keyNodeInfo = new KeyNodeInfo();
+            Article article = buildArticle(content, keyNodeInfo);
             if (article == null) {
                 return;
             }
             articleMapper.updateSelective(article);
 
             article = articleMapper.selectBySign(article.getSign());
-            KeyNodeInfo keyNodeInfo = keyNodeInfoMap.get(article.getSign());
             // 文章最新的标签
             List<Tag> tags = buildTags(keyNodeInfo.getKeyWord());
             List<String> newTags = tags.stream().map(Tag::getName).toList();
@@ -230,33 +235,41 @@ public class PullGithubScheduled {
     }
 
 
+    /**
+     * 如果是新文章
+     * @param content
+     */
     private void newestArticleHandler(GithubContent content) {
-        Article article = buildArticle(content);
+        KeyNodeInfo keyNodeInfo = new KeyNodeInfo();
+        Article article = buildArticle(content, keyNodeInfo);
         if (article == null) {
             return;
         }
 
-        KeyNodeInfo keyNodeInfo = keyNodeInfoMap.get(article.getSign());
-        if (keyNodeInfo != null) {
-            // 手动事务
-            JasperTransactionManager transactionManager = new JasperTransactionManager();
-            try {
-                articleMapper.insertSelective(article);
+        // 手动事务
+        JasperTransactionManager transactionManager = new JasperTransactionManager();
+        try {
+            articleMapper.insertSelective(article);
 
-                List<Tag> tags = buildTags(keyNodeInfo.getKeyWord());
+            List<Tag> tags = buildTags(keyNodeInfo.getKeyWord());
 
-                buildArticleTagsRela(article.getId(), tags);
-                // 提交事务
-                transactionManager.commit();
-            } catch (Throwable e) {
-                // 回滚事务
-                transactionManager.rollback();
-                log.error("批量拉取数据事务回滚", e);
-            }
+            buildArticleTagsRela(article.getId(), tags);
+            // 提交事务
+            transactionManager.commit();
+        } catch (Throwable e) {
+            // 回滚事务
+            transactionManager.rollback();
+            log.error("批量拉取数据事务回滚", e);
         }
     }
 
 
+    /**
+     * 从github拉取数据
+     * @param path
+     * @return
+     * @throws IOException
+     */
     private String pullData(String path) throws IOException {
         // 遍历项目目录，解析到最深层文件目录
         // 1.发送请求获取根目录信息
@@ -312,6 +325,11 @@ public class PullGithubScheduled {
         }
     }
 
+    /**
+     * 判断该文件是否在数据库中
+     * @param path
+     * @return
+     */
     private boolean isExistDatabase(String path) {
         String sign = ShaUtil.sign(path);
         if (StringUtils.isNotBlank(sign)) {
@@ -322,26 +340,6 @@ public class PullGithubScheduled {
         }
     }
 
-
-    /**
-     * 获取引用标签的数据
-     */
-    class KeyNodeVisitor extends AbstractVisitor {
-        private String sign;
-
-        public KeyNodeVisitor(String sign) {
-            this.sign = sign;
-        }
-
-        @Override
-        public void visit(BlockQuote blockQuote) {
-            Text keywordNode = (Text)blockQuote.getFirstChild().getFirstChild();
-            Text introNode = (Text) blockQuote.getNext().getFirstChild().getFirstChild();
-            if (keywordNode != null && introNode != null) {
-                keyNodeInfoMap.put(sign, new KeyNodeInfo(keywordNode.getLiteral(), introNode.getLiteral()));
-            }
-        }
-    }
 
 
 

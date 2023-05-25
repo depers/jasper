@@ -1,6 +1,7 @@
 package cn.bravedawn.web.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 /**
@@ -16,6 +17,8 @@ public class GithubConfig {
 
     private String accessToken;
     private String repoUrl;
+    private String repoDownloadUrl;
+    private String imageStorePath;
 
     public String getAccessToken() {
         return accessToken;
@@ -31,5 +34,21 @@ public class GithubConfig {
 
     public void setRepoUrl(String repoUrl) {
         this.repoUrl = repoUrl;
+    }
+
+    public String getImageStorePath() {
+        return imageStorePath;
+    }
+
+    public void setImageStorePath(String imageStorePath) {
+        this.imageStorePath = imageStorePath;
+    }
+
+    public String getRepoDownloadUrl() {
+        return repoDownloadUrl;
+    }
+
+    public void setRepoDownloadUrl(String repoDownloadUrl) {
+        this.repoDownloadUrl = repoDownloadUrl;
     }
 }
