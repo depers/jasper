@@ -13,6 +13,7 @@ import cn.bravedawn.web.mbg.model.ArticleTagRelation;
 import cn.bravedawn.web.mbg.model.Tag;
 import cn.bravedawn.web.util.Base64Util;
 import cn.bravedawn.web.util.CollectionUtil;
+import cn.bravedawn.web.util.FileUtils;
 import cn.bravedawn.web.util.ShaUtil;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,24 +21,26 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.commonmark.node.AbstractVisitor;
-import org.commonmark.node.BlockQuote;
 import org.commonmark.node.Node;
-import org.commonmark.node.Text;
 import org.commonmark.parser.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.util.*;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * @author : depers
@@ -63,14 +66,12 @@ public class PullGithubScheduled {
     @Autowired
     private GithubConfig githubConfig;
 
-    @Autowired
-    private KeyNodeVisitor keyNodeVisitor;
-
     private static final ObjectMapper mapper;
 
     private static List<GithubContent> githubContentList = new ArrayList<>();
 
     static {
+        // 配置自定义的反序列化器
         mapper = new ObjectMapper();
         SimpleModule module =
                 new SimpleModule("CustomDeserializer", new Version(1, 0, 0, null, null, null));
@@ -82,7 +83,12 @@ public class PullGithubScheduled {
     @Scheduled(cron = "0 0/1 * * * ?")
     public void runTask() {
         try {
-            log.info(">>>>>>>>>>>>>>>>>>>>>>>>开始批量拉取Github上的数据。");
+            // 配置批量日志打印关键字
+            MDC.put("appId", "jasper");
+            MDC.put("tradeName", "JOB-PullGithubScheduled");
+            MDC.put("traceId", UUID.randomUUID().toString().replaceAll("-", ""));
+
+            log.info("---开始批量拉取Github上的数据---");
             // 拉取数据
             List<GithubContent> list = mapper.readValue(pullData(""), List.class);
             for (GithubContent item : list) {
@@ -90,11 +96,12 @@ public class PullGithubScheduled {
             }
             // 将文章信息存库
             saveGithubContentList(githubContentList);
-            log.info(">>>>>>>>>>>>>>>>>>>>>>>>拉取Github上的数据结束。");
+            log.info("---拉取Github上的数据结束---");
         } catch (Throwable e) {
             log.error("定时任务失败，请稍后再试.", e);
         } finally {
             githubContentList.clear();
+            MDC.clear();
         }
     }
 
@@ -118,6 +125,13 @@ public class PullGithubScheduled {
         }
     }
 
+
+    /**
+     * 解析文章信息
+     * @param content 内容
+     * @param keyNodeInfo 节点信息
+     * @return
+     */
     private Article buildArticle(GithubContent content, KeyNodeInfo keyNodeInfo) {
         Article article = new Article();
         String articleContent = Base64Util.decode(content.getContent());
@@ -128,12 +142,15 @@ public class PullGithubScheduled {
         Node document = parser.parse(articleContent);
 
         // 解析标签和介绍、下载图片
+        KeyNodeVisitor keyNodeVisitor = new KeyNodeVisitor();
         document.accept(keyNodeVisitor);
 
         // 从正文中移除标签和介绍
         KeyNodeInfo info = keyNodeVisitor.getKeyNodeInfo();
         if(info != null) {
-            keyNodeInfo = info;
+            // 这里不能直接
+            keyNodeInfo.setKeyWord(info.getKeyWord());
+            keyNodeInfo.setIntro(info.getIntro());
             // 去除引用标签
             articleContent = articleContent.replaceAll(">\\s+" + keyNodeInfo.getKeyWord(), "");
             articleContent = articleContent.replaceAll(">\\s+" + keyNodeInfo.getIntro(), "");
@@ -151,7 +168,11 @@ public class PullGithubScheduled {
         }
     }
 
-
+    /**
+     * 构建标签
+     * @param keyword
+     * @return
+     */
     private List<Tag> buildTags(String keyword) {
         // 整理tag信息
         List<String> tagList = Arrays.asList(keyword.split("/"));
@@ -178,7 +199,12 @@ public class PullGithubScheduled {
     }
 
 
-    private void buildArticleTagsRela(long articleId, List<Tag> maintainTags) {
+    /**
+     * 维护文章和标签之间的关系
+     * @param articleId 文章id
+     * @param maintainTags 标签信息
+     */
+    private void buildArticleTagsRelation(long articleId, List<Tag> maintainTags) {
         // 维护文章和标签的关系表
         List<ArticleTagRelation> articleTagRelationList = new ArrayList<>();
         for (Tag tag : maintainTags) {
@@ -222,7 +248,7 @@ public class PullGithubScheduled {
             if (!CollectionUtil.judgeEquals(newTags, dataTags)) {
                 // 若发生变化则删除原有的标签关联，重新插入
                 articleTagRelationMapper.deleteByArticle(article.getId());
-                buildArticleTagsRela(article.getId(), tags);
+                buildArticleTagsRelation(article.getId(), tags);
             }
 
             // 提交事务
@@ -253,7 +279,7 @@ public class PullGithubScheduled {
 
             List<Tag> tags = buildTags(keyNodeInfo.getKeyWord());
 
-            buildArticleTagsRela(article.getId(), tags);
+            buildArticleTagsRelation(article.getId(), tags);
             // 提交事务
             transactionManager.commit();
         } catch (Throwable e) {
@@ -273,22 +299,30 @@ public class PullGithubScheduled {
     private String pullData(String path) throws IOException {
         // 遍历项目目录，解析到最深层文件目录
         // 1.发送请求获取根目录信息
-        CloseableHttpClient httpclient = HttpClients.createDefault();
+        // 设置超时时间
+
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        RequestConfig connConfig = RequestConfig.custom()
+                .setConnectTimeout(20000)
+                .setSocketTimeout(20000)
+                .build();
+
         HttpGet httpget = new HttpGet(githubConfig.getRepoUrl() + path);
         httpget.addHeader("Authorization", githubConfig.getAccessToken());
+        httpget.setConfig(connConfig);
 
-        ResponseHandler< String > responseHandler = response -> {
+        ResponseHandler<String> responseHandler = response -> {
             int status = response.getStatusLine().getStatusCode();
             if (status >= 200 && status < 300) {
                 HttpEntity entity = response.getEntity();
                 return entity != null ? EntityUtils.toString(entity) : null;
             } else {
-                log.error("请求Github报错, status={}, body={}.", status, EntityUtils.toString(response.getEntity()));
+                log.error("请求Github报错, url={}, status={}, body={}.", httpget.getURI(), status, EntityUtils.toString(response.getEntity()));
                 return null;
             }
         };
 
-        String responseBody = httpclient.execute(httpget, responseHandler);
+        String responseBody = httpClient.execute(httpget, responseHandler);
         return responseBody;
 
     }
@@ -299,7 +333,7 @@ public class PullGithubScheduled {
      * @throws Exception
      */
     public void checkFile(GithubContent content) throws Exception {
-        if (content.getType().equals("file")) {
+        if (content.getType().equals("file") && FileUtils.getFileSuffix(content.getName()).equals(".md")) {
             log.info("拉取文章内容, path={}.", content.getPath());
             String fileJson = pullData(content.getPath());
             if (StringUtils.isNotBlank(fileJson)) {
@@ -309,19 +343,20 @@ public class PullGithubScheduled {
                     log.info("[{}]是新文章, path={}.", item.getName(), item.getPath());
                     item.setIsExist(false);
                 } else {
+                    log.info("[{}]是老文章, path={}.", item.getName(), item.getPath());
                     item.setIsExist(true);
                 }
 
                 githubContentList.add(item);
             }
-            return;
         }
-
-        // 如果不是file就继续往下一层走
-        String responseStr = pullData(content.getPath());
-        List<GithubContent> list = mapper.readValue(responseStr, List.class);
-        for (GithubContent item : list) {
-            checkFile(item);
+        else if (content.getType().equals("dir")) {
+            // 如果不是file就继续往下一层走
+            String responseStr = pullData(content.getPath());
+            List<GithubContent> list = mapper.readValue(responseStr, List.class);
+            for (GithubContent item : list) {
+                checkFile(item);
+            }
         }
     }
 
@@ -339,8 +374,5 @@ public class PullGithubScheduled {
             return true;
         }
     }
-
-
-
 
 }

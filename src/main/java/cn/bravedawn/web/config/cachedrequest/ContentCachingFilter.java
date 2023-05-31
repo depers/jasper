@@ -78,5 +78,6 @@ public class ContentCachingFilter extends OncePerRequestFilter {
         long costTime = System.currentTimeMillis() - startTime;
         log.info("请求:{}, cost end time is [{}]ms.", req.getRequestURI(), costTime);
         resp.copyBodyToResponse();
+        MDC.clear();
     }
 }

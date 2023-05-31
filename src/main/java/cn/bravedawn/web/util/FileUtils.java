@@ -4,6 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -52,4 +56,15 @@ public class FileUtils {
         return fileName.substring(0, fileName.lastIndexOf("."));
     }
 
+
+    public static void downloadWithJavaNIO(String fileURL, String localFilename) throws IOException {
+        URL url = new URL(fileURL);
+        try (ReadableByteChannel readableByteChannel = Channels.newChannel(url.openStream());
+             FileOutputStream fileOutputStream = new FileOutputStream(localFilename);
+             FileChannel fileChannel = fileOutputStream.getChannel()) {
+
+            fileChannel.transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
+            fileOutputStream.close();
+        }
+    }
 }
