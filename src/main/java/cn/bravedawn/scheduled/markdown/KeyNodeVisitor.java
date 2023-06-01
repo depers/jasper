@@ -37,8 +37,15 @@ public class KeyNodeVisitor extends AbstractVisitor {
     // 配置信息
     private static final GithubConfig githubConfig;
 
+    // 文章路径生成的sha值
+    private String sign;
+
     static {
         githubConfig = (GithubConfig) SpringContextUtil.getBean("githubConfig");
+    }
+
+    public KeyNodeVisitor(String sha) {
+        this.sign = sha;
     }
 
     /**
@@ -52,7 +59,7 @@ public class KeyNodeVisitor extends AbstractVisitor {
             log.info("需要下载图片到本地");
             String title = ((Text)image.getFirstChild()).getLiteral();
             String fileSuffix = FileUtils.getFileSuffix(image.getDestination());
-            String fileName = title + "_" + System.nanoTime() + fileSuffix;
+            String fileName = title + "_" + sign + fileSuffix;
             String filePath = githubConfig.getImageStorePath() + fileName;
             String url = githubConfig.getRepoDownloadUrl() + image.getDestination();
             try {

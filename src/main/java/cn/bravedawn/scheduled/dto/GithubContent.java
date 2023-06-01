@@ -12,6 +12,8 @@ public class GithubContent {
     private String path;
     private String type;
     private String content;
+    private String sha;
+
     /**
      * 是否已经存在，若存在则更新文章内容
      */
@@ -23,11 +25,12 @@ public class GithubContent {
         this.type = type;
     }
 
-    public GithubContent(String name, String path, String type, String content) {
+    public GithubContent(String name, String path, String type, String content, String sha) {
         this.name = name;
         this.path = path;
         this.type = type;
         this.content = content;
+        this.sha = sha;
     }
 
     public String getContent() {
@@ -70,6 +73,22 @@ public class GithubContent {
         isExist = exist;
     }
 
+    public String getSha() {
+        return sha;
+    }
+
+    public void setSha(String sha) {
+        this.sha = sha;
+    }
+
+    public boolean isExist() {
+        return isExist;
+    }
+
+    public void setExist(boolean exist) {
+        isExist = exist;
+    }
+
     @Override
     public String toString() {
         return "GithubContent{" +
@@ -77,7 +96,8 @@ public class GithubContent {
                 ", path='" + path + '\'' +
                 ", type='" + type + '\'' +
                 ", content='" + content + '\'' +
-                ", isExist='" + isExist + '\'' +
+                ", sha='" + sha + '\'' +
+                ", isExist=" + isExist +
                 '}';
     }
 }

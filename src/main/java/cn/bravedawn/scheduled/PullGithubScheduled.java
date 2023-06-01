@@ -1,5 +1,6 @@
 package cn.bravedawn.scheduled;
 
+import cn.bravedawn.scheduled.dto.ArticleDTO;
 import cn.bravedawn.scheduled.dto.GithubContent;
 import cn.bravedawn.scheduled.markdown.KeyNodeVisitor;
 import cn.bravedawn.web.config.GithubConfig;
@@ -27,6 +28,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
+import org.commonmark.renderer.html.HtmlRenderer;
 import org.commonmark.renderer.text.TextContentRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,7 +112,6 @@ public class PullGithubScheduled {
      * @param githubContentList
      */
     private void saveGithubContentList(List<GithubContent> githubContentList) {
-        List<Article> articleList = new ArrayList<>();
         for (GithubContent content : githubContentList) {
             if (content.getIsExist()) {
                 // 老文章的处理逻辑
@@ -128,10 +129,9 @@ public class PullGithubScheduled {
     /**
      * 解析文章信息
      * @param content 内容
-     * @param tag 标签信息
      * @return
      */
-    private Article buildArticle(GithubContent content, String tag) {
+    private ArticleDTO buildArticle(GithubContent content) {
         Article article = new Article();
         String articleContent = Base64Util.decode(content.getContent());
         String sign = ShaUtil.sign(content.getPath());
@@ -141,29 +141,32 @@ public class PullGithubScheduled {
         Node document = parser.parse(articleContent);
 
         // 解析标签和介绍、下载图片
-        KeyNodeVisitor keyNodeVisitor = new KeyNodeVisitor();
+        KeyNodeVisitor keyNodeVisitor = new KeyNodeVisitor(ShaUtil.sign(content.getPath()));
         document.accept(keyNodeVisitor);
 
         // 将更新后的文档进行重新渲染
-        TextContentRenderer renderer = TextContentRenderer.builder().build();
-        String renderText = renderer.render(document);
+        HtmlRenderer renderer = HtmlRenderer.builder().build();
+        String renderHtml = renderer.render(document);
 
         // 从正文中移除标签和介绍
         List<String> info = keyNodeVisitor.getKeyNodeInfo();
         if(info.size() == 2) {
+            ArticleDTO articleDTO = new ArticleDTO();
             // 设置标签
             if (StringUtils.isNotBlank(info.get(0))) {
-                tag = info.get(0);
+                articleDTO.setTag(info.get(0));
             }
             // 整理article信息
             int index = content.getName().lastIndexOf(".");
             article.setTitle(content.getName().substring(0, index));
             article.setIntro(info.get(1));
             article.setAuthor("depers");
-            article.setContent(renderText);
+            article.setContent(renderHtml);
             article.setSign(sign);
             article.setPath(content.getPath());
-            return article;
+            article.setSha(content.getSha());
+            articleDTO.setArticle(article);
+            return articleDTO;
         } else {
             return null;
         }
@@ -229,19 +232,26 @@ public class PullGithubScheduled {
          *  2.插入标签
          *  3.判断标签的结构是否发生变化，若发生则删除原有文章的标签相关的关联，重新插入标签结构
          */
+        // 判断文章是否需要更新
+        boolean updateDatabase = isUpdateDatabase(content.getSha(), content.getPath());
+        if (!updateDatabase) {
+            log.info("文章内容并没有发生改变，暂不进行更新. title={}, sha={}.", content.getName(), content.getSha());
+            return;
+        }
+
         // 手动事务
         JasperTransactionManager transactionManager = new JasperTransactionManager();
         try {
-            String tag = "";
-            Article article = buildArticle(content, tag);
-            if (article == null) {
+            ArticleDTO articleDTO = buildArticle(content);
+            if (articleDTO == null) {
                 return;
             }
+            Article article = articleDTO.getArticle();
             articleMapper.updateSelective(article);
 
             article = articleMapper.selectBySign(article.getSign());
             // 文章最新的标签
-            List<Tag> tags = buildTags(tag);
+            List<Tag> tags = buildTags(articleDTO.getTag());
             List<String> newTags = tags.stream().map(Tag::getName).toList();
 
             // 判断文章的标签是否发生变化
@@ -267,18 +277,17 @@ public class PullGithubScheduled {
      * @param content
      */
     private void newestArticleHandler(GithubContent content) {
-        String tag = "";
-        Article article = buildArticle(content, tag);
-        if (article == null) {
+        ArticleDTO articleDTO = buildArticle(content);
+        if (articleDTO == null) {
             return;
         }
+        Article article = articleDTO.getArticle();
 
         // 手动事务
         JasperTransactionManager transactionManager = new JasperTransactionManager();
         try {
             articleMapper.insertSelective(article);
-
-            List<Tag> tags = buildTags(tag);
+            List<Tag> tags = buildTags(articleDTO.getTag());
 
             buildArticleTagsRelation(article.getId(), tags);
             // 提交事务
@@ -301,7 +310,6 @@ public class PullGithubScheduled {
         // 遍历项目目录，解析到最深层文件目录
         // 1.发送请求获取根目录信息
         // 设置超时时间
-
         CloseableHttpClient httpClient = HttpClients.createDefault();
         RequestConfig connConfig = RequestConfig.custom()
                 .setConnectTimeout(20000)
@@ -372,6 +380,22 @@ public class PullGithubScheduled {
         if (StringUtils.isNotBlank(sign)) {
             int count = articleMapper.selectCountByMd5(sign);
             return count != 0;
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * 查询是否文章的内容是否有更新
+     * @param sha github接口返回的sha值
+     * @param path github接口返回的path
+     * @return
+     */
+    private boolean isUpdateDatabase(String sha, String path) {
+        String sign = ShaUtil.sign(path);
+        if (StringUtils.isNotBlank(sha) && StringUtils.isNotBlank(sign)) {
+            String shaStr = articleMapper.selectShaByMd5(sign);
+            return !sha.equals(shaStr);
         } else {
             return true;
         }

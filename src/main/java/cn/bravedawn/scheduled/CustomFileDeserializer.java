@@ -52,7 +52,8 @@ public class CustomFileDeserializer extends StdDeserializer<GithubContent> {
             String path = rootNode.path("path").asText();
             String name = rootNode.path("name").asText();
             String content = rootNode.path("content").asText();
-            return new GithubContent(name, path, type, content);
+            String sha = rootNode.path("sha").asText();
+            return new GithubContent(name, path, type, content, sha);
         } catch (final Exception e) {
             System.err.println("101_parse_exeption: unknown json.");
         }

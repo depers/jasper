@@ -17,4 +17,6 @@ public interface ArticleMapper {
     int updateSelective(Article article);
 
     Article selectBySign(String sign);
+
+    String selectShaByMd5(String sign);
 }

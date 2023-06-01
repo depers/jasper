@@ -49,6 +49,11 @@ public class Article implements Serializable {
      */
     private String content;
 
+    /**
+     * github的sha值，用来判断该文件是否修改过
+     */
+    private String sha;
+
     private static final long serialVersionUID = 1L;
 
     public Long getId() {
@@ -123,23 +128,27 @@ public class Article implements Serializable {
         this.content = content;
     }
 
+    public String getSha() {
+        return sha;
+    }
+
+    public void setSha(String sha) {
+        this.sha = sha;
+    }
+
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName());
-        sb.append(" [");
-        sb.append("Hash = ").append(hashCode());
-        sb.append(", id=").append(id);
-        sb.append(", title=").append(title);
-        sb.append(", intro=").append(intro);
-        sb.append(", path=").append(path);
-        sb.append(", sign=").append(sign);
-        sb.append(", author=").append(author);
-        sb.append(", insertTime=").append(insertTime);
-        sb.append(", updateTime=").append(updateTime);
-        sb.append(", content=").append(content);
-        sb.append(", serialVersionUID=").append(serialVersionUID);
-        sb.append("]");
-        return sb.toString();
+        return "Article{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", intro='" + intro + '\'' +
+                ", path='" + path + '\'' +
+                ", sign='" + sign + '\'' +
+                ", author='" + author + '\'' +
+                ", insertTime=" + insertTime +
+                ", updateTime=" + updateTime +
+                ", content='" + content + '\'' +
+                ", sha='" + sha + '\'' +
+                '}';
     }
 }

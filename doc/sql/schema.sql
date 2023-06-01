@@ -9,6 +9,7 @@ CREATE table `article`(
     `author`       varchar(20)  not null default '' comment '作者',
     `insert_time`  datetime     not null default current_timestamp comment '创建时间',
     `update_time`  datetime     not null default current_timestamp on update current_timestamp comment '更新时间',
+    `sha`          varchar(50)  not null default '' comment 'github接口返回的sha值',
     primary key (`id`)
 ) engine=InnoDB default charset=utf8mb4 comment '文章表';
 
