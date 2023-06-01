@@ -15,6 +15,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author : depers
@@ -29,16 +32,13 @@ public class KeyNodeVisitor extends AbstractVisitor {
     private static final Logger log = LoggerFactory.getLogger(KeyNodeVisitor.class);
 
     // 关键字节点
-    private KeyNodeInfo keyNodeInfo;
+    private List<String> keyNodeInfo = new ArrayList<>();
 
     // 配置信息
-    private static final String imageStorePath;
-    private static final String repoDownloadUrl;
+    private static final GithubConfig githubConfig;
 
     static {
-        GithubConfig githubConfig = (GithubConfig) SpringContextUtil.getBean("githubConfig");
-        imageStorePath = githubConfig.getImageStorePath();
-        repoDownloadUrl = githubConfig.getRepoDownloadUrl();
+        githubConfig = (GithubConfig) SpringContextUtil.getBean("githubConfig");
     }
 
     /**
@@ -48,16 +48,22 @@ public class KeyNodeVisitor extends AbstractVisitor {
     @Override
     public void visit(Image image) {
         log.info("下载图片, url={}, title={}.", image.getDestination(), image.getTitle());
-        String title = ((Text)image.getFirstChild()).getLiteral();
-        String fileSuffix = FileUtils.getFileSuffix(image.getDestination());
-        String filePath = imageStorePath + title + "_" + System.nanoTime() + fileSuffix;
-        String url = repoDownloadUrl + image.getDestination();
-        try {
-            FileUtils.downloadWithJavaNIO(url, filePath);
-        } catch (IOException e) {
-            log.error("下载图片失败", e);
+        if (!image.getDestination().contains(githubConfig.getAssertUrl())) {
+            log.info("需要下载图片到本地");
+            String title = ((Text)image.getFirstChild()).getLiteral();
+            String fileSuffix = FileUtils.getFileSuffix(image.getDestination());
+            String fileName = title + "_" + System.nanoTime() + fileSuffix;
+            String filePath = githubConfig.getImageStorePath() + fileName;
+            String url = githubConfig.getRepoDownloadUrl() + image.getDestination();
+            try {
+                FileUtils.downloadWithJavaNIO(url, filePath);
+            } catch (IOException e) {
+                log.error("下载图片失败", e);
+            }
+            // 更新文章中的图片地址
+            image.setDestination(githubConfig.getAssertUrl() + fileName);
+            image.getParent().prependChild(image);
         }
-
     }
 
     /**
@@ -67,14 +73,15 @@ public class KeyNodeVisitor extends AbstractVisitor {
     @Override
     public void visit(BlockQuote blockQuote) {
         Text keywordNode = (Text)blockQuote.getFirstChild().getFirstChild();
-        Text introNode = (Text) blockQuote.getNext().getFirstChild().getFirstChild();
-        if (keywordNode != null && introNode != null) {
-            keyNodeInfo =  new KeyNodeInfo(keywordNode.getLiteral(), introNode.getLiteral());
+        if (keywordNode != null) {
+            keyNodeInfo.add(keywordNode.getLiteral());
         }
+        // 从文档中删除
+        blockQuote.unlink();
         log.info("解析块引用文件, keyNodeInfo={}", keyNodeInfo);
     }
 
-    public KeyNodeInfo getKeyNodeInfo() {
+    public List<String> getKeyNodeInfo() {
         return keyNodeInfo;
     }
 }

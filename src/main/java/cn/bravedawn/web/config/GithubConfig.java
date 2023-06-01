@@ -19,6 +19,7 @@ public class GithubConfig {
     private String repoUrl;
     private String repoDownloadUrl;
     private String imageStorePath;
+    private String assertUrl;
 
     public String getAccessToken() {
         return accessToken;
@@ -50,5 +51,13 @@ public class GithubConfig {
 
     public void setRepoDownloadUrl(String repoDownloadUrl) {
         this.repoDownloadUrl = repoDownloadUrl;
+    }
+
+    public String getAssertUrl() {
+        return assertUrl;
+    }
+
+    public void setAssertUrl(String assertUrl) {
+        this.assertUrl = assertUrl;
     }
 }

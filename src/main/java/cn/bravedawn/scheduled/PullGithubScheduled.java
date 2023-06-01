@@ -1,7 +1,6 @@
 package cn.bravedawn.scheduled;
 
 import cn.bravedawn.scheduled.dto.GithubContent;
-import cn.bravedawn.scheduled.dto.KeyNodeInfo;
 import cn.bravedawn.scheduled.markdown.KeyNodeVisitor;
 import cn.bravedawn.web.config.GithubConfig;
 import cn.bravedawn.web.db.JasperTransactionManager;
@@ -28,6 +27,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
+import org.commonmark.renderer.text.TextContentRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -35,7 +35,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -129,10 +128,10 @@ public class PullGithubScheduled {
     /**
      * 解析文章信息
      * @param content 内容
-     * @param keyNodeInfo 节点信息
+     * @param tag 标签信息
      * @return
      */
-    private Article buildArticle(GithubContent content, KeyNodeInfo keyNodeInfo) {
+    private Article buildArticle(GithubContent content, String tag) {
         Article article = new Article();
         String articleContent = Base64Util.decode(content.getContent());
         String sign = ShaUtil.sign(content.getPath());
@@ -145,21 +144,23 @@ public class PullGithubScheduled {
         KeyNodeVisitor keyNodeVisitor = new KeyNodeVisitor();
         document.accept(keyNodeVisitor);
 
+        // 将更新后的文档进行重新渲染
+        TextContentRenderer renderer = TextContentRenderer.builder().build();
+        String renderText = renderer.render(document);
+
         // 从正文中移除标签和介绍
-        KeyNodeInfo info = keyNodeVisitor.getKeyNodeInfo();
-        if(info != null) {
-            // 这里不能直接
-            keyNodeInfo.setKeyWord(info.getKeyWord());
-            keyNodeInfo.setIntro(info.getIntro());
-            // 去除引用标签
-            articleContent = articleContent.replaceAll(">\\s+" + keyNodeInfo.getKeyWord(), "");
-            articleContent = articleContent.replaceAll(">\\s+" + keyNodeInfo.getIntro(), "");
+        List<String> info = keyNodeVisitor.getKeyNodeInfo();
+        if(info.size() == 2) {
+            // 设置标签
+            if (StringUtils.isNotBlank(info.get(0))) {
+                tag = info.get(0);
+            }
             // 整理article信息
             int index = content.getName().lastIndexOf(".");
             article.setTitle(content.getName().substring(0, index));
-            article.setIntro(keyNodeInfo.getIntro());
+            article.setIntro(info.get(1));
             article.setAuthor("depers");
-            article.setContent(articleContent);
+            article.setContent(renderText);
             article.setSign(sign);
             article.setPath(content.getPath());
             return article;
@@ -231,8 +232,8 @@ public class PullGithubScheduled {
         // 手动事务
         JasperTransactionManager transactionManager = new JasperTransactionManager();
         try {
-            KeyNodeInfo keyNodeInfo = new KeyNodeInfo();
-            Article article = buildArticle(content, keyNodeInfo);
+            String tag = "";
+            Article article = buildArticle(content, tag);
             if (article == null) {
                 return;
             }
@@ -240,7 +241,7 @@ public class PullGithubScheduled {
 
             article = articleMapper.selectBySign(article.getSign());
             // 文章最新的标签
-            List<Tag> tags = buildTags(keyNodeInfo.getKeyWord());
+            List<Tag> tags = buildTags(tag);
             List<String> newTags = tags.stream().map(Tag::getName).toList();
 
             // 判断文章的标签是否发生变化
@@ -266,8 +267,8 @@ public class PullGithubScheduled {
      * @param content
      */
     private void newestArticleHandler(GithubContent content) {
-        KeyNodeInfo keyNodeInfo = new KeyNodeInfo();
-        Article article = buildArticle(content, keyNodeInfo);
+        String tag = "";
+        Article article = buildArticle(content, tag);
         if (article == null) {
             return;
         }
@@ -277,7 +278,7 @@ public class PullGithubScheduled {
         try {
             articleMapper.insertSelective(article);
 
-            List<Tag> tags = buildTags(keyNodeInfo.getKeyWord());
+            List<Tag> tags = buildTags(tag);
 
             buildArticleTagsRelation(article.getId(), tags);
             // 提交事务
@@ -317,7 +318,8 @@ public class PullGithubScheduled {
                 HttpEntity entity = response.getEntity();
                 return entity != null ? EntityUtils.toString(entity) : null;
             } else {
-                log.error("请求Github报错, url={}, status={}, body={}.", httpget.getURI(), status, EntityUtils.toString(response.getEntity()));
+                log.error("请求Github报错, url={}, status={}, body={}.", httpget.getURI(), status,
+                        EntityUtils.toString(response.getEntity()));
                 return null;
             }
         };
