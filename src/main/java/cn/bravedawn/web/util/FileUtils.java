@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
@@ -66,5 +67,11 @@ public class FileUtils {
             fileChannel.transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
             fileOutputStream.close();
         }
+    }
+
+
+    public static void main(String[] args) throws IOException {
+        downloadWithJavaNIO("https://raw.githubusercontent.com/depers/jasper-db/main/assert/final%E5%BC%95%E5%8F%91%E7%9A%84%E9%94%99%E8%AF%AF.png",
+                "/Users/depers/Desktop/1.png");
     }
 }

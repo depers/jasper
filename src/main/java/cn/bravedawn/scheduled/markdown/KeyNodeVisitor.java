@@ -16,6 +16,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,15 +56,15 @@ public class KeyNodeVisitor extends AbstractVisitor {
      */
     @Override
     public void visit(Image image) {
-        log.info("下载图片, url={}, title={}.", image.getDestination(), image.getTitle());
+        log.info("下载图片, url={}", image.getDestination());
         if (!image.getDestination().contains(githubConfig.getAssertUrl())) {
             log.info("需要下载图片到本地");
             String title = ((Text)image.getFirstChild()).getLiteral();
             String fileSuffix = FileUtils.getFileSuffix(image.getDestination());
             String fileName = title + "_" + sign + fileSuffix;
             String filePath = githubConfig.getImageStorePath() + fileName;
-            String url = githubConfig.getRepoDownloadUrl() + image.getDestination();
             try {
+                String url = githubConfig.getRepoDownloadUrl() + "/assert/" + URLEncoder.encode(title + fileSuffix, "utf-8");
                 FileUtils.downloadWithJavaNIO(url, filePath);
             } catch (IOException e) {
                 log.error("下载图片失败", e);
@@ -91,4 +93,5 @@ public class KeyNodeVisitor extends AbstractVisitor {
     public List<String> getKeyNodeInfo() {
         return keyNodeInfo;
     }
+
 }

@@ -52,7 +52,8 @@ public class CustomDeserializer extends StdDeserializer<List<GithubContent>> {
                 String type = node.path("type").asText();
                 String path = node.path("path").asText();
                 String name = node.path("name").asText();
-                list.add(new GithubContent(name, path, type));
+                String url = node.path("url").asText();
+                list.add(new GithubContent(name, path, type, url));
             }
         } catch (final Exception e) {
             System.err.println("101_parse_exeption: unknown json.");

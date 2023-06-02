@@ -91,7 +91,7 @@ public class PullGithubScheduled {
 
             log.info("---开始批量拉取Github上的数据---");
             // 拉取数据
-            List<GithubContent> list = mapper.readValue(pullData(""), List.class);
+            List<GithubContent> list = mapper.readValue(pullData("", false), List.class);
             for (GithubContent item : list) {
                 checkFile(item);
             }
@@ -143,6 +143,7 @@ public class PullGithubScheduled {
         // 解析标签和介绍、下载图片
         KeyNodeVisitor keyNodeVisitor = new KeyNodeVisitor(ShaUtil.sign(content.getPath()));
         document.accept(keyNodeVisitor);
+
 
         // 将更新后的文档进行重新渲染
         HtmlRenderer renderer = HtmlRenderer.builder().build();
@@ -306,7 +307,7 @@ public class PullGithubScheduled {
      * @return
      * @throws IOException
      */
-    private String pullData(String path) throws IOException {
+    private String pullData(String path, boolean isDirect) throws IOException {
         // 遍历项目目录，解析到最深层文件目录
         // 1.发送请求获取根目录信息
         // 设置超时时间
@@ -316,7 +317,8 @@ public class PullGithubScheduled {
                 .setSocketTimeout(20000)
                 .build();
 
-        HttpGet httpget = new HttpGet(githubConfig.getRepoUrl() + path);
+        String url = isDirect ? path : githubConfig.getRepoUrl() + path;
+        HttpGet httpget = new HttpGet(url);
         httpget.addHeader("Authorization", githubConfig.getAccessToken());
         httpget.setConfig(connConfig);
 
@@ -345,7 +347,7 @@ public class PullGithubScheduled {
     public void checkFile(GithubContent content) throws Exception {
         if (content.getType().equals("file") && FileUtils.getFileSuffix(content.getName()).equals(".md")) {
             log.info("拉取文章内容, path={}.", content.getPath());
-            String fileJson = pullData(content.getPath());
+            String fileJson = pullData(content.getUrl(), true);
             if (StringUtils.isNotBlank(fileJson)) {
                 GithubContent item = mapper.readValue(fileJson, GithubContent.class);
                 // 判断是否是新文章，若是新文章则添加到githubContentList里，若不是则跳过
@@ -362,7 +364,7 @@ public class PullGithubScheduled {
         }
         else if (content.getType().equals("dir")) {
             // 如果不是file就继续往下一层走
-            String responseStr = pullData(content.getPath());
+            String responseStr = pullData(content.getPath(), false);
             List<GithubContent> list = mapper.readValue(responseStr, List.class);
             for (GithubContent item : list) {
                 checkFile(item);

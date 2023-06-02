@@ -13,16 +13,18 @@ public class GithubContent {
     private String type;
     private String content;
     private String sha;
+    private String url;
 
     /**
      * 是否已经存在，若存在则更新文章内容
      */
     private boolean isExist;
 
-    public GithubContent(String name, String path, String type) {
+    public GithubContent(String name, String path, String type, String url) {
         this.name = name;
         this.path = path;
         this.type = type;
+        this.url = url;
     }
 
     public GithubContent(String name, String path, String type, String content, String sha) {
@@ -89,6 +91,14 @@ public class GithubContent {
         isExist = exist;
     }
 
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
     @Override
     public String toString() {
         return "GithubContent{" +
@@ -97,6 +107,7 @@ public class GithubContent {
                 ", type='" + type + '\'' +
                 ", content='" + content + '\'' +
                 ", sha='" + sha + '\'' +
+                ", url='" + url + '\'' +
                 ", isExist=" + isExist +
                 '}';
     }

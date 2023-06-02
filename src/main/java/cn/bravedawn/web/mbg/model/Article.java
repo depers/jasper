@@ -1,6 +1,8 @@
 package cn.bravedawn.web.mbg.model;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Date;
 
 public class Article implements Serializable {
@@ -150,5 +152,10 @@ public class Article implements Serializable {
                 ", content='" + content + '\'' +
                 ", sha='" + sha + '\'' +
                 '}';
+    }
+
+
+    public static void main(String[] args) throws UnsupportedEncodingException {
+
     }
 }
