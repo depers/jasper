@@ -3,12 +3,10 @@ package cn.bravedawn.web.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
-import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -26,8 +24,9 @@ public class FileUtils {
 
     /**
      * 将文件保存到本地
+     *
      * @param inputStream 输入流
-     * @param filePath 文件存放的路径（包含文件名）
+     * @param filePath    文件存放的路径（包含文件名）
      */
     public static void storeFile(InputStream inputStream, String filePath) {
         try {
@@ -41,6 +40,7 @@ public class FileUtils {
 
     /**
      * 获取文件的后缀名
+     *
      * @param fileName 文件名称
      * @return
      */
@@ -50,6 +50,7 @@ public class FileUtils {
 
     /**
      * 获取文件名称（不包含后缀名）
+     *
      * @param fileName 文件名称
      * @return
      */
@@ -59,13 +60,12 @@ public class FileUtils {
 
 
     public static void downloadWithJavaNIO(String fileURL, String localFilename) throws IOException {
-        URL url = new URL(fileURL);
-        try (ReadableByteChannel readableByteChannel = Channels.newChannel(url.openStream());
-             FileOutputStream fileOutputStream = new FileOutputStream(localFilename);
-             FileChannel fileChannel = fileOutputStream.getChannel()) {
-
-            fileChannel.transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
-            fileOutputStream.close();
+        int CONNECT_TIMEOUT = 10000;
+        int READ_TIMEOUT = 10000;
+        try {
+            org.apache.commons.io.FileUtils.copyURLToFile(new URL(fileURL), new File(localFilename), CONNECT_TIMEOUT, READ_TIMEOUT);
+        } catch (IOException e) {
+            log.error("下载文件超时", e);
         }
     }
 

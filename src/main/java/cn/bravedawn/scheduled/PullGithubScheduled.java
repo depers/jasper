@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Matcher;
 
 /**
  * @author : depers
@@ -162,7 +163,8 @@ public class PullGithubScheduled {
             article.setTitle(content.getName().substring(0, index));
             article.setIntro(info.get(1));
             article.setAuthor("depers");
-            article.setContent(renderHtml);
+            // 处理sql插入的$符号
+            article.setContent(Matcher.quoteReplacement(renderHtml));
             article.setSign(sign);
             article.setPath(content.getPath());
             article.setSha(content.getSha());
@@ -287,6 +289,7 @@ public class PullGithubScheduled {
         // 手动事务
         JasperTransactionManager transactionManager = new JasperTransactionManager();
         try {
+            log.info("文章信息: article={}.", article);
             articleMapper.insertSelective(article);
             List<Tag> tags = buildTags(articleDTO.getTag());
 
