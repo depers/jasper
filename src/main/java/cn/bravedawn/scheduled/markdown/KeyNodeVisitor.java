@@ -1,6 +1,5 @@
 package cn.bravedawn.scheduled.markdown;
 
-import cn.bravedawn.scheduled.dto.KeyNodeInfo;
 import cn.bravedawn.web.config.GithubConfig;
 import cn.bravedawn.web.util.FileUtils;
 import cn.bravedawn.web.util.SpringContextUtil;
@@ -10,13 +9,8 @@ import org.commonmark.node.Image;
 import org.commonmark.node.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;

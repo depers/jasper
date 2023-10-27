@@ -120,6 +120,9 @@
             <if test="content != null">
                 content = #{content},
             </if>
+            <if test="sha != null">
+                sha = #{sha}
+            </if>
         </set>
         where sign = #{sign}
     </update>

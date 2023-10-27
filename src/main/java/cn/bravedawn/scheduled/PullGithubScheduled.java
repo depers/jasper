@@ -70,7 +70,8 @@ public class PullGithubScheduled {
 
     private static final ObjectMapper mapper;
 
-    private static List<GithubContent> githubContentList = new ArrayList<>();
+    // 保存批量执行过程中的文章信息，避免批量重复执行
+    private static ThreadLocal<List<GithubContent>> githubContentListThreadLocal = new ThreadLocal<>();
 
     static {
         // 配置自定义的反序列化器
@@ -82,7 +83,15 @@ public class PullGithubScheduled {
         mapper.registerModule(module);
     }
 
-    @Scheduled(cron = "0 0/1 * * * ?")
+
+    /**
+     * 这段批量的逻辑简单来叙述一下：
+     * 1. 拉取github上面的数据，并逐步递归迭代，获取到所有的文章信息
+     * 2. 保存文章
+     *  1）判断是否为新文章，若为新文章则直接插入数据库，并维护标签和文章的关系
+     *  2) 判断是否需要更新文章，这里根据github返回的sign字段来进行判断，若更新了文章，则会更新文章到数据库，并维护标签和文章的关系
+     */
+    @Scheduled(cron = "* 0/1 * * * ?")
     public void runTask() {
         try {
             // 配置批量日志打印关键字
@@ -96,13 +105,15 @@ public class PullGithubScheduled {
             for (GithubContent item : list) {
                 checkFile(item);
             }
+
             // 将文章信息存库
-            saveGithubContentList(githubContentList);
+            saveGithubContentList();
+
             log.info("---拉取Github上的数据结束---");
         } catch (Throwable e) {
             log.error("定时任务失败，请稍后再试.", e);
         } finally {
-            githubContentList.clear();
+            githubContentListThreadLocal.remove();
             MDC.clear();
         }
     }
@@ -110,9 +121,9 @@ public class PullGithubScheduled {
 
     /**
      * 保存文章
-     * @param githubContentList
      */
-    private void saveGithubContentList(List<GithubContent> githubContentList) {
+    private void saveGithubContentList() {
+        List<GithubContent> githubContentList = githubContentListThreadLocal.get();
         for (GithubContent content : githubContentList) {
             if (content.getIsExist()) {
                 // 老文章的处理逻辑
@@ -144,7 +155,6 @@ public class PullGithubScheduled {
         // 解析标签和介绍、下载图片
         KeyNodeVisitor keyNodeVisitor = new KeyNodeVisitor(ShaUtil.sign(content.getPath()));
         document.accept(keyNodeVisitor);
-
 
         // 将更新后的文档进行重新渲染
         HtmlRenderer renderer = HtmlRenderer.builder().build();
@@ -226,7 +236,7 @@ public class PullGithubScheduled {
 
     /**
      * 如果是已经存在数据库的文章，我们称为老数据
-     * @param content
+     * @param content 文章内容
      */
     private void oldestArticleHandler(GithubContent content) {
         /**
@@ -277,7 +287,7 @@ public class PullGithubScheduled {
 
     /**
      * 如果是新文章
-     * @param content
+     * @param content 文章内容
      */
     private void newestArticleHandler(GithubContent content) {
         ArticleDTO articleDTO = buildArticle(content);
@@ -306,7 +316,8 @@ public class PullGithubScheduled {
 
     /**
      * 从github拉取数据
-     * @param path
+     * @param path 请求地址
+     * @param isDirect 是否为直接请求的地址，如果是目录则需要加签名的前缀，如果是文章则为直接请求的目录
      * @return
      * @throws IOException
      */
@@ -348,6 +359,9 @@ public class PullGithubScheduled {
      * @throws Exception
      */
     public void checkFile(GithubContent content) throws Exception {
+
+        List<GithubContent> githubContents = new ArrayList<>();
+
         if (content.getType().equals("file") && FileUtils.getFileSuffix(content.getName()).equals(".md")) {
             log.info("拉取文章内容, path={}.", content.getPath());
             String fileJson = pullData(content.getUrl(), true);
@@ -361,11 +375,9 @@ public class PullGithubScheduled {
                     log.info("[{}]是老文章, path={}.", item.getName(), item.getPath());
                     item.setIsExist(true);
                 }
-
-                githubContentList.add(item);
+                githubContents.add(item);
             }
-        }
-        else if (content.getType().equals("dir")) {
+        } else if (content.getType().equals("dir")) {
             // 如果不是file就继续往下一层走
             String responseStr = pullData(content.getPath(), false);
             List<GithubContent> list = mapper.readValue(responseStr, List.class);
@@ -373,11 +385,21 @@ public class PullGithubScheduled {
                 checkFile(item);
             }
         }
+
+        // 判断当前线程是否存在需要变更的文章
+        if (!githubContents.isEmpty()) {
+            if (githubContentListThreadLocal.get() == null) {
+                githubContentListThreadLocal.set(githubContents);
+            } else {
+                githubContentListThreadLocal.get().addAll(githubContents);
+            }
+        }
+
     }
 
     /**
-     * 判断该文件是否在数据库中
-     * @param path
+     * 判断该文件是否在数据库中，这里我们其实是通过github返回的文章path字段，加签之后和数据库中article表的sign字段进行匹配
+     * @param path 在的话-返回true, 不在返回false
      * @return
      */
     private boolean isExistDatabase(String path) {
