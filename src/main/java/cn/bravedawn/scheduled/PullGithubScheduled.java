@@ -290,15 +290,15 @@ public class PullGithubScheduled {
      * @param content 文章内容
      */
     private void newestArticleHandler(GithubContent content) {
-        ArticleDTO articleDTO = buildArticle(content);
-        if (articleDTO == null) {
-            return;
-        }
-        Article article = articleDTO.getArticle();
-
         // 手动事务
         JasperTransactionManager transactionManager = new JasperTransactionManager();
         try {
+            ArticleDTO articleDTO = buildArticle(content);
+            if (articleDTO == null) {
+                return;
+            }
+            Article article = articleDTO.getArticle();
+
             log.info("文章信息: article={}.", article);
             articleMapper.insertSelective(article);
             List<Tag> tags = buildTags(articleDTO.getTag());
@@ -404,6 +404,7 @@ public class PullGithubScheduled {
      */
     private boolean isExistDatabase(String path) {
         String sign = ShaUtil.sign(path);
+        log.info("判断文件是否在数据库中，sign={}", sign);
         if (StringUtils.isNotBlank(sign)) {
             int count = articleMapper.selectCountByMd5(sign);
             return count != 0;

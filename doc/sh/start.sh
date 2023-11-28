@@ -1,2 +1,2 @@
 #!/bin/bash
-nohop java -jar $0 > nohop.log 2>&1 &
+nohup java -jar $0 > nohup.log 2>&1 &

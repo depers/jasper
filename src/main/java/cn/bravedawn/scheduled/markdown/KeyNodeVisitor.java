@@ -1,6 +1,8 @@
 package cn.bravedawn.scheduled.markdown;
 
 import cn.bravedawn.web.config.GithubConfig;
+import cn.bravedawn.web.exception.BusinessException;
+import cn.bravedawn.web.exception.SystemException;
 import cn.bravedawn.web.util.FileUtils;
 import cn.bravedawn.web.util.SpringContextUtil;
 import org.commonmark.node.AbstractVisitor;
@@ -62,6 +64,7 @@ public class KeyNodeVisitor extends AbstractVisitor {
                 FileUtils.downloadWithJavaNIO(url, filePath);
             } catch (IOException e) {
                 log.error("下载图片失败", e);
+                throw new BusinessException("下载文件失败");
             }
             // 更新文章中的图片地址
             image.setDestination(githubConfig.getAssertUrl() + fileName);

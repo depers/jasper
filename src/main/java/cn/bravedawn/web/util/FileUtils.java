@@ -60,8 +60,8 @@ public class FileUtils {
 
 
     public static void downloadWithJavaNIO(String fileURL, String localFilename) throws IOException {
-        int CONNECT_TIMEOUT = 10000;
-        int READ_TIMEOUT = 10000;
+        int CONNECT_TIMEOUT = 2000;
+        int READ_TIMEOUT = 2000;
         try {
             org.apache.commons.io.FileUtils.copyURLToFile(new URL(fileURL), new File(localFilename), CONNECT_TIMEOUT, READ_TIMEOUT);
         } catch (IOException e) {

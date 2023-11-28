@@ -6,6 +6,8 @@
 
     <settings>
         <setting name="mapUnderscoreToCamelCase" value="true"/>
+        <!--一级缓存使用STATEMENT-->
+        <setting name="localCacheScope" value="STATEMENT"/>
     </settings>
 
     <typeAliases>

@@ -65,7 +65,7 @@ public class ContentCachingFilter extends OncePerRequestFilter {
 
         // 请求前的日志打印
         MDC.put("appId", "jasper");
-        MDC.put("tradeName", req.getRequestURI() + "-" + req.getMethod());
+        MDC.put("tradeName", getTradeName(request));
         MDC.put("traceId", UUID.randomUUID().toString().replaceAll("-", ""));
         log.info("请求:{}, start request.", req.getRequestURI());
         log.info("请求参数:{}.", requestBodyStr);
@@ -79,5 +79,17 @@ public class ContentCachingFilter extends OncePerRequestFilter {
         log.info("请求:{}, cost end time is [{}]ms.", req.getRequestURI(), costTime);
         resp.copyBodyToResponse();
         MDC.clear();
+    }
+
+
+    /**
+     * 获取日志文件名称
+     * @param request 请求
+     * @return
+     */
+    private String getTradeName(HttpServletRequest request) {
+        String url = request.getRequestURI().replaceFirst("/", "").replaceAll("/", "-");
+        String httpMethod = request.getMethod();
+        return url + "-" + httpMethod;
     }
 }
