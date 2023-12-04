@@ -99,7 +99,7 @@
     </Appenders>
     <Loggers>
         <!-- 级别顺序（低到高）：TRACE < DEBUG < INFO < WARN < ERROR < FATAL -->
-        <Root level="INFO" includeLocation="true">
+        <Root level="info" includeLocation="true">
             <!--AppenderRef中的ref值必须是在前面定义的appenders-->
             <AppenderRef ref="ConsolePrint"/>
             <AppenderRef ref="Routing"/>

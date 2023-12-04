@@ -91,7 +91,7 @@ public class PullGithubScheduled {
      *  1）判断是否为新文章，若为新文章则直接插入数据库，并维护标签和文章的关系
      *  2) 判断是否需要更新文章，这里根据github返回的sign字段来进行判断，若更新了文章，则会更新文章到数据库，并维护标签和文章的关系
      */
-    @Scheduled(cron = "* 0/1 * * * ?")
+    @Scheduled(cron = "0 0/1 * * * ? ")
     public void runTask() {
         try {
             // 配置批量日志打印关键字
@@ -252,13 +252,15 @@ public class PullGithubScheduled {
             return;
         }
 
+        // 解析文章信息
+        ArticleDTO articleDTO = buildArticle(content);
+        if (articleDTO == null) {
+            return;
+        }
+
         // 手动事务
         JasperTransactionManager transactionManager = new JasperTransactionManager();
         try {
-            ArticleDTO articleDTO = buildArticle(content);
-            if (articleDTO == null) {
-                return;
-            }
             Article article = articleDTO.getArticle();
             articleMapper.updateSelective(article);
 
@@ -290,15 +292,15 @@ public class PullGithubScheduled {
      * @param content 文章内容
      */
     private void newestArticleHandler(GithubContent content) {
+        ArticleDTO articleDTO = buildArticle(content);
+        if (articleDTO == null) {
+            return;
+        }
+        Article article = articleDTO.getArticle();
+
         // 手动事务
         JasperTransactionManager transactionManager = new JasperTransactionManager();
         try {
-            ArticleDTO articleDTO = buildArticle(content);
-            if (articleDTO == null) {
-                return;
-            }
-            Article article = articleDTO.getArticle();
-
             log.info("文章信息: article={}.", article);
             articleMapper.insertSelective(article);
             List<Tag> tags = buildTags(articleDTO.getTag());
@@ -404,7 +406,6 @@ public class PullGithubScheduled {
      */
     private boolean isExistDatabase(String path) {
         String sign = ShaUtil.sign(path);
-        log.info("判断文件是否在数据库中，sign={}", sign);
         if (StringUtils.isNotBlank(sign)) {
             int count = articleMapper.selectCountByMd5(sign);
             return count != 0;

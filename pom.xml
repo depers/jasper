@@ -115,6 +115,12 @@
             <artifactId>commonmark</artifactId>
             <version>${commonmak.version}</version>
         </dependency>
+
+        <!--指标监控工具-->
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-core</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

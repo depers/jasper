@@ -1,6 +1,7 @@
 package cn.bravedawn.web.db;
 
 import cn.bravedawn.web.util.SpringContextUtil;
+import cn.bravedawn.web.util.TransactionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,15 +32,18 @@ public class JasperTransactionManager {
         def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
         def.setTimeout(60);
         this.transactionStatus = transactionManager.getTransaction(def);
+        TransactionUtil.log();
     }
 
     public void commit() {
         transactionManager.commit(transactionStatus);
+        TransactionUtil.log();
     }
 
 
     public void rollback() {
         transactionManager.rollback(transactionStatus);
+        TransactionUtil.log();
     }
 
 }
