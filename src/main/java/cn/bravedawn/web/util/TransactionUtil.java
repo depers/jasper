@@ -20,16 +20,14 @@ public class TransactionUtil {
 
     private static final Logger log = LoggerFactory.getLogger(TransactionUtil.class);
 
-    @Autowired
-    private static DataSource dataSource;
-
+    private static DataSource dataSource = (DataSource) SpringContextUtil.getBean(DataSource.class);
 
     /**
      * 打印事务的死亡时间
      */
-    public static void log() {
+    public static void log(String logPrefix) {
         ConnectionHolder holder = (ConnectionHolder) TransactionSynchronizationManager.getResource(dataSource);
         Date deadline = holder.getDeadline();
-        log.info("当前事务的死亡时间：{}", LocalDateUtil.toLocalDateTimeStr(deadline));
+        log.info("{}-当前事务的死亡时间：{}", logPrefix, LocalDateUtil.toLocalDateTimeStr(deadline));
     }
 }

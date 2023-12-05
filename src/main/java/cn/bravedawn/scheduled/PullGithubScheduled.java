@@ -281,8 +281,8 @@ public class PullGithubScheduled {
             transactionManager.commit();
         } catch (Throwable e) {
             // 回滚事务
-            transactionManager.rollback();
             log.error("批量拉取数据事务回滚", e);
+            transactionManager.rollback();
         }
     }
 
@@ -310,8 +310,8 @@ public class PullGithubScheduled {
             transactionManager.commit();
         } catch (Throwable e) {
             // 回滚事务
-            transactionManager.rollback();
             log.error("批量拉取数据事务回滚", e);
+            transactionManager.rollback();
         }
     }
 

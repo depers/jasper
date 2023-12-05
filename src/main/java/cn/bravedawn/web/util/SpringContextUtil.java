@@ -49,4 +49,16 @@ public class SpringContextUtil implements ApplicationContextAware {
         assertContextInjected();
         return applicationContext.getBean(name);
     }
+
+    /**
+     * 通过class对象获取Bean
+     *
+     * @param cls
+     * @return
+     * @throws BeansException
+     */
+    public static Object getBean(Class cls) throws BeansException {
+        assertContextInjected();
+        return applicationContext.getBean(cls);
+    }
 }

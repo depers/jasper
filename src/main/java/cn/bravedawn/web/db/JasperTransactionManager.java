@@ -32,18 +32,18 @@ public class JasperTransactionManager {
         def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
         def.setTimeout(60);
         this.transactionStatus = transactionManager.getTransaction(def);
-        TransactionUtil.log();
+        TransactionUtil.log("(create transaction)");
     }
 
     public void commit() {
         transactionManager.commit(transactionStatus);
-        TransactionUtil.log();
+        TransactionUtil.log("(commit transaction)");
     }
 
 
     public void rollback() {
         transactionManager.rollback(transactionStatus);
-        TransactionUtil.log();
+        TransactionUtil.log("(rollback transaction)");
     }
 
 }
