@@ -36,14 +36,14 @@ public class JasperTransactionManager {
     }
 
     public void commit() {
-        transactionManager.commit(transactionStatus);
         TransactionUtil.log("(commit transaction)");
+        transactionManager.commit(transactionStatus);
     }
 
 
     public void rollback() {
-        transactionManager.rollback(transactionStatus);
         TransactionUtil.log("(rollback transaction)");
+        transactionManager.rollback(transactionStatus);
     }
 
 }
