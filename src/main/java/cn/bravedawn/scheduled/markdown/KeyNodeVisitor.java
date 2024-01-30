@@ -55,18 +55,17 @@ public class KeyNodeVisitor extends AbstractVisitor {
         String destination = image.getDestination();
         log.info("下载图片, url={}", destination);
         if (!image.getDestination().contains(githubConfig.getAssertUrl())) {
-            log.info("需要下载图片到本地");
             String title = destination.substring(destination.lastIndexOf("/") + 1, destination.indexOf("."));
             int index = destination.indexOf("assert") + 7;
             String fileSuffix = destination.substring(index);
             String fileName = title + "_" + sign + FileUtils.getFileSuffix(destination);
             String filePath = githubConfig.getImageStorePath() + fileName;
+            log.info("需要下载图片到本地, fileName={}.", fileName);
             try {
                 String url = githubConfig.getRepoDownloadUrl() + "/assert/" + fileSuffix;
                 FileUtils.downloadWithJavaNIO(url, filePath);
             } catch (IOException e) {
                 log.error("下载图片失败", e);
-                throw new BusinessException("下载文件失败");
             }
             // 更新文章中的图片地址
             image.setDestination(githubConfig.getAssertUrl() + fileName);
