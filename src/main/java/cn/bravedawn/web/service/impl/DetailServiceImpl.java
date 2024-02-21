@@ -20,7 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 /**
@@ -70,7 +72,7 @@ public class DetailServiceImpl implements DetailService {
         detailDTO.setTags(tagList);
         detailDTO.setTitle(article.getTitle());
         detailDTO.setPublishDate(LocalDateUtil.toLocalDateTimeStr(article.getInsertTime()));
-        detailDTO.setContent(article.getContent());
+        detailDTO.setContent(new String(Base64.getDecoder().decode(article.getContent()), StandardCharsets.UTF_8));
         detailDTO.setCommentList(commentDTOList);
         return CommonResult.SUCCESS(detailDTO);
     }

@@ -1,8 +1,6 @@
 package cn.bravedawn.scheduled.markdown;
 
-import cn.bravedawn.web.config.GithubConfig;
-import cn.bravedawn.web.exception.BusinessException;
-import cn.bravedawn.web.exception.SystemException;
+import cn.bravedawn.scheduled.config.GithubConfig;
 import cn.bravedawn.web.util.FileUtils;
 import cn.bravedawn.web.util.SpringContextUtil;
 import org.commonmark.node.AbstractVisitor;
@@ -12,8 +10,6 @@ import org.commonmark.node.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,20 +49,10 @@ public class KeyNodeVisitor extends AbstractVisitor {
     @Override
     public void visit(Image image) {
         String destination = image.getDestination();
-        log.info("下载图片, url={}", destination);
+        log.info("图片地址, url={}", destination);
         if (!image.getDestination().contains(githubConfig.getAssertUrl())) {
-            String title = destination.substring(destination.lastIndexOf("/") + 1, destination.indexOf("."));
-            int index = destination.indexOf("assert") + 7;
-            String fileSuffix = destination.substring(index);
-            String fileName = title + "_" + sign + FileUtils.getFileSuffix(destination);
-            String filePath = githubConfig.getImageStorePath() + fileName;
-            log.info("需要下载图片到本地, fileName={}.", fileName);
-            try {
-                String url = githubConfig.getRepoDownloadUrl() + "/assert/" + fileSuffix;
-                FileUtils.downloadWithJavaNIO(url, filePath);
-            } catch (IOException e) {
-                log.error("下载图片失败", e);
-            }
+            String title = destination.substring(destination.lastIndexOf("/") + 1, destination.lastIndexOf("."));
+            String fileName = title + FileUtils.getFileSuffix(destination);
             // 更新文章中的图片地址
             image.setDestination(githubConfig.getAssertUrl() + fileName);
             image.getParent().prependChild(image);

@@ -1,8 +1,7 @@
-package cn.bravedawn.scheduled;
+package cn.bravedawn.scheduled.serializer;
 
 import cn.bravedawn.scheduled.dto.GithubContent;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -26,19 +25,19 @@ import java.util.List;
  * @description:
  * @date : Created in 2023/2/1 17:18
  */
-public class CustomDeserializer extends StdDeserializer<List<GithubContent>> {
+public class GithubCustomDeserializer extends StdDeserializer<List<GithubContent>> {
 
     /**
      * 自定义反序列化器
      */
 
 
-    public CustomDeserializer() {
+    public GithubCustomDeserializer() {
         this(null);
     }
 
 
-    public CustomDeserializer(final Class<?> vc) {
+    public GithubCustomDeserializer(final Class<?> vc) {
         super(vc);
     }
 
@@ -68,7 +67,7 @@ public class CustomDeserializer extends StdDeserializer<List<GithubContent>> {
         ObjectMapper mapper = new ObjectMapper();
         SimpleModule module =
                 new SimpleModule("CustomDeserializer", new Version(1, 0, 0, null, null, null));
-        module.addDeserializer(List.class, new CustomDeserializer());
+        module.addDeserializer(List.class, new GithubCustomDeserializer());
         mapper.registerModule(module);
         List list = mapper.readValue(json, List.class);
         System.out.println(list);

@@ -1,22 +1,14 @@
-package cn.bravedawn.scheduled;
+package cn.bravedawn.scheduled.serializer;
 
 import cn.bravedawn.scheduled.dto.GithubContent;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.ObjectCodec;
-import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,19 +18,19 @@ import java.util.List;
  * @description:
  * @date : Created in 2023/2/1 17:18
  */
-public class CustomFileDeserializer extends StdDeserializer<GithubContent> {
+public class GithubCustomFileDeserializer extends StdDeserializer<GithubContent> {
 
     /**
      * 自定义反序列化器
      */
 
 
-    public CustomFileDeserializer() {
+    public GithubCustomFileDeserializer() {
         this(null);
     }
 
 
-    public CustomFileDeserializer(final Class<?> vc) {
+    public GithubCustomFileDeserializer(final Class<?> vc) {
         super(vc);
     }
 

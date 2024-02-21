@@ -3,7 +3,9 @@ package cn.bravedawn.scheduled;
 import cn.bravedawn.scheduled.dto.ArticleDTO;
 import cn.bravedawn.scheduled.dto.GithubContent;
 import cn.bravedawn.scheduled.markdown.KeyNodeVisitor;
-import cn.bravedawn.web.config.GithubConfig;
+import cn.bravedawn.scheduled.config.GithubConfig;
+import cn.bravedawn.scheduled.serializer.GithubCustomDeserializer;
+import cn.bravedawn.scheduled.serializer.GithubCustomFileDeserializer;
 import cn.bravedawn.web.db.JasperTransactionManager;
 import cn.bravedawn.web.mbg.mapper.ArticleMapper;
 import cn.bravedawn.web.mbg.mapper.ArticleTagRelationMapper;
@@ -29,20 +31,17 @@ import org.apache.http.util.EntityUtils;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
-import org.commonmark.renderer.text.TextContentRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-import java.util.regex.Matcher;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 /**
  * @author : depers
@@ -68,6 +67,9 @@ public class PullGithubScheduled {
     @Autowired
     private GithubConfig githubConfig;
 
+    @Value("${jasper.pullData.repo}")
+    private String pullDataRepo;
+
     private static final ObjectMapper mapper;
 
     // 保存批量执行过程中的文章信息，避免批量重复执行
@@ -78,8 +80,8 @@ public class PullGithubScheduled {
         mapper = new ObjectMapper();
         SimpleModule module =
                 new SimpleModule("CustomDeserializer", new Version(1, 0, 0, null, null, null));
-        module.addDeserializer(List.class, new CustomDeserializer());
-        module.addDeserializer(GithubContent.class, new CustomFileDeserializer());
+        module.addDeserializer(List.class, new GithubCustomDeserializer());
+        module.addDeserializer(GithubContent.class, new GithubCustomFileDeserializer());
         mapper.registerModule(module);
     }
 
@@ -174,7 +176,7 @@ public class PullGithubScheduled {
             article.setIntro(info.get(1));
             article.setAuthor("depers");
             // 处理sql插入的$符号
-            article.setContent(Matcher.quoteReplacement(renderHtml));
+            article.setContent(Base64.getEncoder().encodeToString(renderHtml.getBytes(StandardCharsets.UTF_8)));
             article.setSign(sign);
             article.setPath(content.getPath());
             article.setSha(content.getSha());
@@ -352,7 +354,6 @@ public class PullGithubScheduled {
 
         String responseBody = httpClient.execute(httpget, responseHandler);
         return responseBody;
-
     }
 
     /**
