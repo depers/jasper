@@ -14,6 +14,7 @@ public class GiteeConfig {
 
     private String assessToken;
     private String repoUrl;
+    private String blobUrl;
 
     public String getAssessToken() {
         return assessToken;
@@ -29,6 +30,14 @@ public class GiteeConfig {
 
     public void setRepoUrl(String repoUrl) {
         this.repoUrl = repoUrl;
+    }
+
+    public String getBlobUrl() {
+        return blobUrl;
+    }
+
+    public void setBlobUrl(String blobUrl) {
+        this.blobUrl = blobUrl;
     }
 }
 

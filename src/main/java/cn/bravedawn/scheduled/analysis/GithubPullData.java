@@ -34,7 +34,7 @@ import java.util.List;
  */
 
 @Component
-public class GithubPullData implements PullData {
+public class GithubPullData extends PullData {
 
     private static final Logger log = LoggerFactory.getLogger(GithubPullData.class);
 
@@ -43,8 +43,6 @@ public class GithubPullData implements PullData {
     @Autowired
     private GithubConfig githubConfig;
 
-    @Autowired
-    private ArticleMapper articleMapper;
 
     // 保存批量执行过程中的文章信息，避免批量重复执行
     private static ThreadLocal<List<GithubContent>> githubContentListThreadLocal = new ThreadLocal<>();
@@ -94,10 +92,10 @@ public class GithubPullData implements PullData {
                 // 判断是否是新文章，若是新文章则添加到githubContentList里，若不是则跳过
                 if (!isExistDatabase(item.getPath())) {
                     log.info("[{}]是新文章, path={}.", item.getName(), item.getPath());
-                    item.setIsExist(false);
+                    item.setExist(false);
                 } else {
                     log.info("[{}]是老文章, path={}.", item.getName(), item.getPath());
-                    item.setIsExist(true);
+                    item.setExist(true);
                 }
                 githubContents.add(item);
             }
@@ -160,18 +158,5 @@ public class GithubPullData implements PullData {
         return responseBody;
     }
 
-    /**
-     * 判断该文件是否在数据库中，这里我们其实是通过github返回的文章path字段，加签之后和数据库中article表的sign字段进行匹配
-     * @param path 在的话-返回true, 不在返回false
-     * @return
-     */
-    private boolean isExistDatabase(String path) {
-        String sign = ShaUtil.sign(path);
-        if (StringUtils.isNotBlank(sign)) {
-            int count = articleMapper.selectCountByMd5(sign);
-            return count != 0;
-        } else {
-            return true;
-        }
-    }
+
 }

@@ -10,6 +10,7 @@ import org.commonmark.node.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,13 +34,16 @@ public class KeyNodeVisitor extends AbstractVisitor {
 
     // 文章路径生成的sha值
     private String sign;
+    // 存储库类型
+    private String repoType;
 
     static {
         githubConfig = (GithubConfig) SpringContextUtil.getBean("githubConfig");
     }
 
-    public KeyNodeVisitor(String sha) {
+    public KeyNodeVisitor(String sha, String repoType) {
         this.sign = sha;
+        this.repoType = repoType;
     }
 
     /**
@@ -49,10 +53,22 @@ public class KeyNodeVisitor extends AbstractVisitor {
     @Override
     public void visit(Image image) {
         String destination = image.getDestination();
-        log.info("图片地址, url={}", destination);
+        log.info("下载图片, url={}", destination);
         if (!image.getDestination().contains(githubConfig.getAssertUrl())) {
+            // 图片标题（不包含文件后缀）
             String title = destination.substring(destination.lastIndexOf("/") + 1, destination.lastIndexOf("."));
-            String fileName = title + FileUtils.getFileSuffix(destination);
+            int index = destination.indexOf("assert") + 7;
+            // 包含文件后缀的图片名称
+            String fileSuffix = destination.substring(index);
+            String fileName = title + "_" + sign + FileUtils.getFileSuffix(destination);
+            String filePath = githubConfig.getImageStorePath() + fileName;
+            log.info("需要下载图片到本地, fileName={}.", fileName);
+            try {
+                String url = githubConfig.getRepoDownloadUrl() + "/assert/" + fileSuffix;
+                FileUtils.downloadWithJavaNIO(url, filePath);
+            } catch (IOException e) {
+                log.error("下载图片失败", e);
+            }
             // 更新文章中的图片地址
             image.setDestination(githubConfig.getAssertUrl() + fileName);
             image.getParent().prependChild(image);
