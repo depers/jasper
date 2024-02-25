@@ -72,7 +72,7 @@ public class PullAssertImageScheduled {
         headers.put("Authorization", githubConfig.getAccessToken());
     }
 
-    // @Scheduled(cron = "0 0/1 * * * ? ")
+    @Scheduled(cron = "0 0/1 * * * ? ")
     private void pullImages() {
 
         try {

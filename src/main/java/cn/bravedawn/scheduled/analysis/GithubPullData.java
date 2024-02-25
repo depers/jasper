@@ -60,6 +60,7 @@ public class GithubPullData extends PullData {
     @Override
     public List<GithubContent> loadData() {
         try {
+            githubContentListThreadLocal.set(new ArrayList<>());
             // 拉取数据
             List<GithubContent> list = mapper.readValue(pullData("", false), List.class);
             for (GithubContent item : list) {
@@ -97,7 +98,7 @@ public class GithubPullData extends PullData {
                     log.info("[{}]是老文章, path={}.", item.getName(), item.getPath());
                     item.setExist(true);
                 }
-                githubContents.add(item);
+                githubContentListThreadLocal.get().add(item);
             }
         } else if (content.getType().equals("dir")) {
             // 如果不是file就继续往下一层走
@@ -107,16 +108,6 @@ public class GithubPullData extends PullData {
                 checkFile(item);
             }
         }
-
-        // 判断当前线程是否存在需要变更的文章
-        if (!githubContents.isEmpty()) {
-            if (githubContentListThreadLocal.get() == null) {
-                githubContentListThreadLocal.set(githubContents);
-            } else {
-                githubContentListThreadLocal.get().addAll(githubContents);
-            }
-        }
-
     }
 
 
