@@ -1,7 +1,6 @@
 package cn.bravedawn.scheduled.markdown;
 
-import cn.bravedawn.scheduled.config.GithubConfig;
-import cn.bravedawn.web.util.FileUtils;
+import cn.bravedawn.scheduled.properties.GithubConfig;
 import cn.bravedawn.web.util.SpringContextUtil;
 import org.commonmark.node.AbstractVisitor;
 import org.commonmark.node.BlockQuote;
@@ -10,7 +9,6 @@ import org.commonmark.node.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,6 +68,9 @@ public class KeyNodeVisitor extends AbstractVisitor {
      */
     @Override
     public void visit(BlockQuote blockQuote) {
+        if (keyNodeInfo.size() == 2) {
+            return;
+        }
         Text keywordNode = (Text)blockQuote.getFirstChild().getFirstChild();
         if (keywordNode != null) {
             keyNodeInfo.add(keywordNode.getLiteral());

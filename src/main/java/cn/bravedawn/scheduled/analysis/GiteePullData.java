@@ -1,14 +1,11 @@
 package cn.bravedawn.scheduled.analysis;
 
-import cn.bravedawn.scheduled.config.GiteeConfig;
+import cn.bravedawn.scheduled.properties.GiteeConfig;
 import cn.bravedawn.scheduled.constant.Constants;
-import cn.bravedawn.scheduled.dto.Content;
 import cn.bravedawn.scheduled.dto.GiteeContent;
 import cn.bravedawn.scheduled.dto.GithubContent;
 import cn.bravedawn.scheduled.serializer.GiteeCustomDeserializer;
 import cn.bravedawn.scheduled.serializer.GiteeCustomFileDeserializer;
-import cn.bravedawn.scheduled.serializer.GithubCustomDeserializer;
-import cn.bravedawn.scheduled.serializer.GithubCustomFileDeserializer;
 import cn.bravedawn.web.util.FileUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.Version;
@@ -28,9 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 

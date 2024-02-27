@@ -1,6 +1,6 @@
 package cn.bravedawn.scheduled;
 
-import cn.bravedawn.scheduled.config.GithubConfig;
+import cn.bravedawn.scheduled.properties.GithubConfig;
 import cn.bravedawn.scheduled.constant.Constants;
 import cn.bravedawn.scheduled.dto.GithubBlob;
 import cn.bravedawn.scheduled.dto.GithubBlobContent;
