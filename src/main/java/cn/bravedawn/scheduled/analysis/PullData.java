@@ -15,6 +15,8 @@ import cn.bravedawn.web.util.Base64Util;
 import cn.bravedawn.web.util.CollectionUtil;
 import cn.bravedawn.web.util.ShaUtil;
 import org.apache.commons.lang.StringUtils;
+import org.commonmark.Extension;
+import org.commonmark.ext.gfm.tables.TablesExtension;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
@@ -24,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,8 +56,24 @@ public abstract class PullData {
     @Value("${jasper.pullData.repo}")
     private String pullDataRepo;
 
+    private HtmlRenderer renderer;
+    private Parser parser;
+
     abstract List<? extends Content> loadData();
 
+
+    @PostConstruct
+    public void init() {
+        // 配置表格扩展
+        List<Extension> extensions = Arrays.asList(TablesExtension.create());
+        parser = Parser.builder()
+                .extensions(extensions)
+                .build();
+        renderer = HtmlRenderer.builder()
+                .extensions(extensions)
+                .build();
+
+    }
 
     public void storeArticle() {
         List<? extends Content> contents = loadData();
@@ -187,7 +206,6 @@ public abstract class PullData {
         String sign = ShaUtil.sign(content.getPath());
 
         // 解析markdown
-        Parser parser = Parser.builder().build();
         Node document = parser.parse(articleContent);
 
         // 解析标签和介绍、下载图片
@@ -195,7 +213,6 @@ public abstract class PullData {
         document.accept(keyNodeVisitor);
 
         // 将更新后的文档进行重新渲染
-        HtmlRenderer renderer = HtmlRenderer.builder().build();
         String renderHtml = renderer.render(document);
 
         // 从正文中移除标签和介绍
