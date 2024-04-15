@@ -58,6 +58,7 @@ public class KeyNodeVisitor extends AbstractVisitor {
             // 包含文件后缀的图片名称
             String fileSuffix = destination.substring(index);
             image.setDestination(githubConfig.getAssertUrl() + fileSuffix);
+            image.setTitle(fileSuffix.substring(0, fileSuffix.lastIndexOf(".")));
             image.getParent().prependChild(image);
         }
     }

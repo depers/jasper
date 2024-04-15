@@ -3,6 +3,7 @@ package cn.bravedawn.scheduled.analysis;
 import cn.bravedawn.scheduled.PullGithubScheduled;
 import cn.bravedawn.scheduled.dto.ArticleDTO;
 import cn.bravedawn.scheduled.dto.Content;
+import cn.bravedawn.scheduled.markdown.ImageNodeRenderer;
 import cn.bravedawn.scheduled.markdown.KeyNodeVisitor;
 import cn.bravedawn.web.db.JasperTransactionManager;
 import cn.bravedawn.web.mbg.mapper.ArticleMapper;
@@ -19,6 +20,9 @@ import org.commonmark.Extension;
 import org.commonmark.ext.gfm.tables.TablesExtension;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
+import org.commonmark.renderer.NodeRenderer;
+import org.commonmark.renderer.html.HtmlNodeRendererContext;
+import org.commonmark.renderer.html.HtmlNodeRendererFactory;
 import org.commonmark.renderer.html.HtmlRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,6 +74,13 @@ public abstract class PullData {
                 .extensions(extensions)
                 .build();
         renderer = HtmlRenderer.builder()
+                // 自定义图片渲染
+                .nodeRendererFactory(new HtmlNodeRendererFactory() {
+                    @Override
+                    public NodeRenderer create(HtmlNodeRendererContext context) {
+                        return new ImageNodeRenderer(context);
+                    }
+                })
                 .extensions(extensions)
                 .build();
 
