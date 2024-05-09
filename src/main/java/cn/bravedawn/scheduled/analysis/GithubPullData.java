@@ -84,6 +84,9 @@ public class GithubPullData extends PullData {
         List<GithubContent> githubContents = new ArrayList<>();
 
         if (content.getType().equals("file") && FileUtils.getFileSuffix(content.getName()).equals(".md")) {
+            if (content.getPath().equals("README.md")) {
+                return;
+            }
             log.info("拉取文章内容, path={}.", content.getPath());
             String fileJson = pullData(content.getUrl(), true);
             if (StringUtils.isNotBlank(fileJson)) {

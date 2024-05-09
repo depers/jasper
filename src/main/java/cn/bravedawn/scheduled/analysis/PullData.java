@@ -227,28 +227,20 @@ public abstract class PullData {
         String renderHtml = renderer.render(document);
 
         // 从正文中移除标签和介绍
-        List<String> info = keyNodeVisitor.getKeyNodeInfo();
-        if(info.size() == 2) {
-            ArticleDTO articleDTO = new ArticleDTO();
-            // 设置标签
-            if (StringUtils.isNotBlank(info.get(0))) {
-                articleDTO.setTag(info.get(0));
-            }
-            // 整理article信息
-            int index = content.getName().lastIndexOf(".");
-            article.setTitle(content.getName().substring(0, index));
-            article.setIntro(info.get(1));
-            article.setAuthor("depers");
-            // 处理sql插入的$符号
-            article.setContent(Base64.getEncoder().encodeToString(renderHtml.getBytes(StandardCharsets.UTF_8)));
-            article.setSign(sign);
-            article.setPath(content.getPath());
-            article.setSha(content.getSha());
-            articleDTO.setArticle(article);
-            return articleDTO;
-        } else {
-            return null;
-        }
+        ArticleDTO articleDTO = new ArticleDTO();
+        // 设置标签
+        articleDTO.setTag(keyNodeVisitor.getArtTags());
+        // 整理article信息
+        article.setTitle(keyNodeVisitor.getArtTile());
+        article.setIntro(keyNodeVisitor.getArtBackground());
+        article.setAuthor(keyNodeVisitor.getArtAuthor());
+        // 处理sql插入的$符号
+        article.setContent(Base64.getEncoder().encodeToString(renderHtml.getBytes(StandardCharsets.UTF_8)));
+        article.setSign(sign);
+        article.setPath(content.getPath());
+        article.setSha(content.getSha());
+        articleDTO.setArticle(article);
+        return articleDTO;
     }
 
     /**

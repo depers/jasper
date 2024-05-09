@@ -1,5 +1,6 @@
 package cn.bravedawn.scheduled.markdown;
 
+import org.apache.commons.lang.StringUtils;
 import org.commonmark.node.Image;
 import org.commonmark.node.Node;
 import org.commonmark.renderer.NodeRenderer;
@@ -35,13 +36,15 @@ public class ImageNodeRenderer implements NodeRenderer {
     @Override
     public void render(Node node) {
         Image imageNode = (Image) node;
-        Map<String, String> divAttrsMap = new HashMap<>();
-        divAttrsMap.put("align", "center");
-        Map<String, String> imgAttriMap = new HashMap<>();
-        imgAttriMap.put("alt", imageNode.getTitle());
-        imgAttriMap.put("src", imageNode.getDestination());
-        html.tag("div", divAttrsMap);
-        html.tag("img", imgAttriMap);
-        html.tag("/div");
+        if (StringUtils.isNotBlank(imageNode.getDestination())) {
+            Map<String, String> divAttrsMap = new HashMap<>();
+            divAttrsMap.put("align", "center");
+            Map<String, String> imgAttriMap = new HashMap<>();
+            imgAttriMap.put("alt", imageNode.getTitle());
+            imgAttriMap.put("src", imageNode.getDestination());
+            html.tag("div", divAttrsMap);
+            html.tag("img", imgAttriMap);
+            html.tag("/div");
+        }
     }
 }
