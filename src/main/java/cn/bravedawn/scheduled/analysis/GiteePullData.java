@@ -139,6 +139,9 @@ public class GiteePullData extends PullData {
             }
         } else if (StringUtils.equals(item.getType(), Constants.GITEE_TYPE_BLOB)
                     && FileUtils.getFileSuffix(item.getName()).equals(".md")) {
+            if (item.getPath().equals("README.md")) {
+                return;
+            }
             String itemResult = pullData(giteeConfig.getBlobUrl() + item.getSha());
             GiteeContent giteeContent = mapper.readValue(itemResult, GiteeContent.class);
             giteeContent.setName(item.getName());
