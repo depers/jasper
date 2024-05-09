@@ -35,7 +35,7 @@
                              TimeBasedTriggeringPolicy：日志文件按照时间备份
                                 interval：日记压缩的时间间隔，这个配置与filePattern属性的精确时间相关，上面配置的是%d{yyyy-MM-dd}-%i.log.gz
                                           也就是按照天作为时间间隔配置的单位
-                                modulate：说明是否对压缩时间进行调制。比如说我们配置interval="4"，filePattern配置的单位是小时，也就是每两个小时做一次压缩备份。
+                                modulate：说明是否对压缩时间进行调制。比如说我们配置interval="4"，filePattern配置的单位是小时，也就是每4个小时做一次压缩备份。
                                           那么假设上次封存日志的时间为03:00，则下次封存日志的时间为04:00， 之后的封存时间依次为08:00，12:00，16:00
                              SizeBasedTriggeringPolicy：日志文件按照大小备份
                                 size="10MB"日志文件大小大于10MB的时候触发备份

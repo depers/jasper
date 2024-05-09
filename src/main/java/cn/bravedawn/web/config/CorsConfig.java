@@ -17,6 +17,7 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.addAllowedOrigin("http://www.bravedawn.cn");
         config.addAllowedOrigin("http://43.142.173.83");
+        config.addAllowedOrigin("http://localhost:63344");
 
         // 设置是否发送cookie信息
         config.setAllowCredentials(true);
