@@ -84,16 +84,16 @@ public class KeyNodeVisitor extends AbstractVisitor {
     @Override
     @Deprecated
     public void visit(BlockQuote blockQuote) {
-        if (keyNodeInfo.size() == 2) {
-            return;
-        }
-        Text keywordNode = (Text)blockQuote.getFirstChild().getFirstChild();
-        if (keywordNode != null) {
-            keyNodeInfo.add(keywordNode.getLiteral());
-        }
-        // 从文档中删除
-        blockQuote.unlink();
-        log.info("解析块引用文件, keyNodeInfo={}", keyNodeInfo);
+        // if (keyNodeInfo.size() == 2) {
+        //     return;
+        // }
+        // Text keywordNode = (Text)blockQuote.getFirstChild().getFirstChild();
+        // if (keywordNode != null) {
+        //     keyNodeInfo.add(keywordNode.getLiteral());
+        // }
+        // // 从文档中删除
+        // blockQuote.unlink();
+        // log.info("解析块引用文件, keyNodeInfo={}", keyNodeInfo);
     }
 
 
