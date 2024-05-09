@@ -10,6 +10,7 @@
         <result column="sign" jdbcType="VARCHAR" property="sign" />
         <result column="author" jdbcType="VARCHAR" property="author" />
         <result column="sha" jdbcType="VARCHAR" property="sha"/>
+        <result column="is_show" jdbcType="INTEGER" property="isShow"/>
         <result column="insert_time" jdbcType="TIMESTAMP" property="insertTime" />
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
     </resultMap>
@@ -17,7 +18,7 @@
         <result column="content" jdbcType="LONGVARCHAR" property="content" />
     </resultMap>
     <sql id="Base_Column_List">
-        id, title, intro, content, path, sign, author, sha, insert_time, update_time
+        id, title, intro, content, path, sign, author, sha, is_show, insert_time, update_time
     </sql>
 
     <select id="selectArticleList" resultType="article">
@@ -28,6 +29,8 @@
             insert_time
         FROM
             article
+        where
+            is_show = 1
         ORDER BY id DESC
     </select>
 
@@ -38,6 +41,8 @@
             article
         WHERE
             id = #{articleId}
+        AND
+            is_show = 1
     </select>
 
     <select id="selectBySign" resultType="article">
@@ -84,6 +89,9 @@
             <if test="sha != null">
                 sha,
             </if>
+            <if test="isShow != null">
+                is_show
+            </if>
         </trim>
         <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
             <if test="title != null">
@@ -107,6 +115,9 @@
             <if test="sha != null">
                 #{sha,jdbcType=LONGVARCHAR},
             </if>
+            <if test="isShow != null">
+                #{isShow,jdbcType=INTEGER}
+            </if>
         </trim>
     </insert>
 
@@ -121,7 +132,10 @@
                 content = #{content},
             </if>
             <if test="sha != null">
-                sha = #{sha}
+                sha = #{sha},
+            </if>
+            <if test="isShow != null">
+                is_show = #{isShow},
             </if>
         </set>
         where sign = #{sign}
