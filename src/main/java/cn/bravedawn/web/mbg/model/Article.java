@@ -58,6 +58,11 @@ public class Article implements Serializable {
      */
     private String sha;
 
+    /**
+     * 是否在前端展示，1-是，0-否
+     */
+    private Integer isShow;
+
     private static final long serialVersionUID = 1L;
 
     public Long getId() {
@@ -140,6 +145,14 @@ public class Article implements Serializable {
         this.sha = sha;
     }
 
+    public Integer getIsShow() {
+        return isShow;
+    }
+
+    public void setIsShow(Integer isShow) {
+        this.isShow = isShow;
+    }
+
     @Override
     public String toString() {
         return "Article{" +
@@ -153,8 +166,7 @@ public class Article implements Serializable {
                 ", updateTime=" + updateTime +
                 ", content='" + content + '\'' +
                 ", sha='" + sha + '\'' +
+                ", isShow=" + isShow +
                 '}';
     }
-
-
 }

@@ -239,6 +239,7 @@ public abstract class PullData {
         article.setSign(sign);
         article.setPath(content.getPath());
         article.setSha(content.getSha());
+        article.setIsShow(keyNodeVisitor.getArtIsShow().equals("true") ? 1 : 0);
         articleDTO.setArticle(article);
         return articleDTO;
     }
