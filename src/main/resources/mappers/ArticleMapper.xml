@@ -125,8 +125,14 @@
         update
             article
         <set>
+            <if test="title != null">
+                title = #{title},
+            </if>
             <if test="intro != null">
                 intro = #{intro},
+            </if>
+            <if test="author != null">
+                author = #{author},
             </if>
             <if test="content != null">
                 content = #{content},
