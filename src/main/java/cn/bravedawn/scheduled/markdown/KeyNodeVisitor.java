@@ -114,11 +114,11 @@ public class KeyNodeVisitor extends AbstractVisitor {
                 throw new IllegalArgumentException("文章元数据信息不全");
             }
 
-            artTile = tableCell.get(0);
-            artTags = tableCell.get(1);
-            artBackground = tableCell.get(2);
-            artAuthor = tableCell.get(3);
-            artIsShow = tableCell.get(4);
+            artTile = tableCell.get(0).trim();
+            artTags = tableCell.get(1).trim();
+            artBackground = tableCell.get(2).trim();
+            artAuthor = tableCell.get(3).trim();
+            artIsShow = tableCell.get(4).trim();
             log.info("表格信息解析结果，, artTile={}, artTags={}, artBackground={}, artIsShow={}", artTile, artTags, artBackground, artIsShow);
             // 从文档正文中删除表格内容
             tableBlock.unlink();
