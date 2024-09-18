@@ -48,6 +48,9 @@ public class KeyNodeVisitor extends AbstractVisitor {
     // 作者
     private String artAuthor;
 
+    // 是否已经解析过开头的表格信息
+    private boolean isFirstAnalyseTable;
+
     static {
         githubConfig = (GithubConfig) SpringContextUtil.getBean("githubConfig");
     }
@@ -99,7 +102,7 @@ public class KeyNodeVisitor extends AbstractVisitor {
 
     @Override
     public void visit(CustomBlock customBlock) {
-        if (customBlock instanceof TableBlock) {
+        if (customBlock instanceof TableBlock && !isFirstAnalyseTable) {
             TableBlock tableBlock = (TableBlock) customBlock;
 
             // 配置表格扩展
@@ -120,6 +123,7 @@ public class KeyNodeVisitor extends AbstractVisitor {
             artAuthor = tableCell.get(3).trim();
             artIsShow = tableCell.get(4).trim();
             log.info("表格信息解析结果，, artTile={}, artTags={}, artBackground={}, artIsShow={}", artTile, artTags, artBackground, artIsShow);
+            isFirstAnalyseTable = true;
             // 从文档正文中删除表格内容
             tableBlock.unlink();
         }
