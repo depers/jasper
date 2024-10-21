@@ -18,11 +18,10 @@ public class JasyptUtil {
         /*配置文件中配置如下的算法*/
         standardPBEStringEncryptor.setAlgorithm("PBEWithMD5AndDES");
         /*配置文件中配置的password*/
-        // String password = UUID.randomUUID().toString();
-        String password = "83354f4e-3d20-40ba-ab65-1c7711d62dfa";
+        String password = UUID.randomUUID().toString();
         standardPBEStringEncryptor.setPassword(password);
         // 加密
-        String jasyptPasswordEN = standardPBEStringEncryptor.encrypt("0d4d74f725adda7d51f7d13d55afbefd");
+        String jasyptPasswordEN = standardPBEStringEncryptor.encrypt("121212");
         // 解密
         String jasyptPasswordDE = standardPBEStringEncryptor.decrypt(jasyptPasswordEN);
         System.out.println("加密后密码：" + jasyptPasswordEN);
