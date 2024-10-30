@@ -16,6 +16,7 @@ public class CorsConfig {
         // 1. 添加cors配置信息
         CorsConfiguration config = new CorsConfiguration();
         config.addAllowedOrigin("http://www.bravedawn.cn");
+        config.addAllowedOrigin("http://bravedawn.cn");
         config.addAllowedOrigin("http://43.142.173.83");
 
         // 设置是否发送cookie信息
