@@ -5,19 +5,16 @@
     <Properties>
         <Property name="LOG_HOME">/opt/app/jasper/logs</Property>
 
-        <Property name="LOG_PATTERN">
-            [%d{yyyy-MM-dd HH:mm:ss.SSS}]
-            [%X{traceId}]
-            [%X{tradeName}]
-            [%t]
-            %-5level
-            %logger{36} -
-            %msg%n
-        </Property>
+        <Property name="LOG_PATTERN">[%d{yyyy-MM-dd HH:mm:ss.SSS}][%X{traceId}][%X{tradeName}][%t]%-5level%logger{36} - %msg%n</Property>
     </Properties>
 
     <!-- ================= Appenders ================= -->
     <Appenders>
+
+        <!-- 控制台（一般保留，容器/调试用） -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
 
         <!-- 普通业务日志文件 -->
         <RollingFile name="BizFile"
@@ -60,7 +57,9 @@
         <!-- 默认：AsyncLogger（INFO / DEBUG 等） -->
         <Root level="INFO">
             <AppenderRef ref="BizFile"/>
+            <!--<AppenderRef ref="Console"/>-->
         </Root>
+
 
         <!-- 错误日志：同步写，不走 Async -->
         <Logger name="ERROR_LOG"

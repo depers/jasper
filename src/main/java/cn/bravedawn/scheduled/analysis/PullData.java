@@ -95,7 +95,7 @@ public abstract class PullData {
     /**
      * 保存文章
      */
-    private void saveGithubContentList(List<? extends Content> contents) {
+    public void saveGithubContentList(List<? extends Content> contents) {
         for (Content content : contents) {
             if (content.isExist()) {
                 // 老文章的处理逻辑

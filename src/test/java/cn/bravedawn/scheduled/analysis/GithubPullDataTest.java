@@ -1,5 +1,7 @@
 package cn.bravedawn.scheduled.analysis;
 
+import cn.bravedawn.scheduled.dto.GiteeContent;
+import cn.bravedawn.scheduled.dto.GithubContent;
 import cn.bravedawn.web.JasperApplication;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,6 +12,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 
 /**
  * @author : depers
@@ -24,6 +27,9 @@ public class GithubPullDataTest {
     @Autowired
     private GiteePullData giteePullData;
 
+    @Autowired
+    private GithubPullData githubPullData;
+
 
     @Test
     @DisplayName("Junit测试")
@@ -31,10 +37,20 @@ public class GithubPullDataTest {
         // String result = giteePullData.pullData("master");
         // System.out.println(result);
 
-        giteePullData.loadData();
+        List<GiteeContent> contents = giteePullData.loadData();
+        giteePullData.saveGithubContentList(contents);
     }
 
 
+    @Test
+    @DisplayName("测试从github拉取数据")
+    public void testGithubPullData() throws URISyntaxException, IOException {
+        // String result = giteePullData.pullData("master");
+        // System.out.println(result);
+
+        List<GithubContent> contents = githubPullData.loadData();
+        githubPullData.saveGithubContentList(contents);
+    }
 
 
 }
